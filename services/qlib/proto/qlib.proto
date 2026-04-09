@@ -1,0 +1,17 @@
+syntax = "proto3";
+package qlib;
+
+service QlibService {
+  rpc ComputeFactors(FactorRequest) returns (FactorResponse);
+}
+
+message FactorRequest {
+  string symbol = 1;
+  string start_date = 2;
+  string end_date = 3;
+  string factor_set = 4;
+}
+
+message FactorResponse {
+  map<string, float> factors = 1;
+}
