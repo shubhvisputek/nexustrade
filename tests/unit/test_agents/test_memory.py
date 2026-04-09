@@ -7,7 +7,7 @@ from nexustrade.agents.memory import MarketMemory
 
 class TestMarketMemory:
     async def test_store_and_query(self):
-        mem = MarketMemory(max_entries=100)
+        mem = MarketMemory(collection_name=f"test_{id(self)}", max_entries=100)
         entry_id = await mem.store(
             symbol="AAPL",
             situation_text="RSI oversold at 28, price at support level",
@@ -26,7 +26,7 @@ class TestMarketMemory:
         assert len(results) > 0
 
     async def test_update_outcome(self):
-        mem = MarketMemory(max_entries=100)
+        mem = MarketMemory(collection_name=f"test_{id(self)}", max_entries=100)
         entry_id = await mem.store("AAPL", "Test situation", "buy", 0.8)
         await mem.update_outcome(entry_id, "profit", pnl=250.0)
 
@@ -59,7 +59,7 @@ class TestMarketMemory:
         assert all(s == "AAPL" for s in symbols)
 
     async def test_count_property(self):
-        mem = MarketMemory(max_entries=100)
+        mem = MarketMemory(collection_name=f"test_{id(self)}", max_entries=100)
         assert mem.count == 0
         await mem.store("AAPL", "Test", "hold", 0.5)
         assert mem.count == 1
