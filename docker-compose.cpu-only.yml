@@ -1,0 +1,6 @@
+# CPU-only override — excludes GPU services (finrl, fingpt)
+# Usage: docker compose -f docker-compose.yml --profile cpu-only up
+#
+# This file is a reference. The main docker-compose.yml uses profiles:
+#   cpu-only: redis, data, agents, llm, execution, web, qlib
+#   full: all 9 services including GPU containers

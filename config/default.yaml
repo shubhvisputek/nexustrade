@@ -1,0 +1,212 @@
+# NexusTrade Default Configuration
+# All settings can be overridden via environment variables with NEXUS__ prefix
+# Example: NEXUS__LLM__MODE=local overrides llm.mode
+
+log_level: INFO
+
+# --- LLM Configuration ---
+llm:
+  mode: hybrid  # local | cloud | hybrid
+  fast:
+    provider: ollama
+    model: "llama3:8b"
+    base_url: "http://localhost:11434"
+    api_key: null
+    temperature: 0.3
+    top_p: 1.0
+    max_tokens: 2048
+  deep:
+    provider: anthropic
+    model: "claude-sonnet-4-20250514"
+    base_url: null
+    api_key: null  # Set via NEXUS__LLM__DEEP__API_KEY or ANTHROPIC_API_KEY
+    temperature: 0.7
+    top_p: 1.0
+    max_tokens: 4096
+  vision:
+    provider: anthropic
+    model: "claude-sonnet-4-20250514"
+    base_url: null
+    api_key: null
+    temperature: 0.5
+    top_p: 1.0
+    max_tokens: 4096
+  fallbacks:
+    - provider: openai
+      model: "gpt-4o"
+      base_url: null
+      api_key: null
+      temperature: 0.7
+      top_p: 1.0
+      max_tokens: 4096
+
+# --- Agent Configuration ---
+agents:
+  enabled:
+    - name: warren_buffett
+      source: ai_hedge_fund
+      enabled: true
+      llm_override: null
+      config: {}
+    - name: charlie_munger
+      source: ai_hedge_fund
+      enabled: true
+      llm_override: null
+      config: {}
+    - name: technical_analyst
+      source: ai_hedge_fund
+      enabled: true
+      llm_override: null
+      config: {}
+    - name: bull_bear_debate
+      source: trading_agents_debate
+      enabled: true
+      llm_override: null
+      config:
+        rounds: 2
+    - name: finbert_sentiment
+      source: finbert
+      enabled: true
+      llm_override: null
+      config: {}
+  aggregation_mode: weighted_confidence  # weighted_confidence | majority | unanimous | portfolio_manager
+  min_confidence: 0.6
+  execution_mode: parallel  # parallel | sequential | dag
+  debate_rounds: 2
+  early_termination_confidence: 0.9
+
+# --- Execution Configuration ---
+execution:
+  mode: python  # tradingview | python | both
+  brokers:
+    - name: paper
+      enabled: true
+      markets: ["us_equity", "india_equity", "crypto", "forex"]
+      config:
+        initial_cash: 100000.0
+        slippage_model: percentage
+        slippage_pct: 0.001
+        commission_pct: 0.0005
+    - name: alpaca
+      enabled: false
+      markets: ["us_equity"]
+      config:
+        api_key: null  # Set via env
+        secret_key: null
+        paper: true
+        base_url: "https://paper-api.alpaca.markets"
+    - name: openalgo
+      enabled: false
+      markets: ["india_equity", "india_fno"]
+      config:
+        host: "http://localhost:5000"
+        api_key: null
+    - name: ccxt_broker
+      enabled: false
+      markets: ["crypto"]
+      config:
+        exchange: binance
+        api_key: null
+        secret: null
+        sandbox: true
+  tradingview:
+    enabled: false
+    webhook_port: 8888
+    passphrase: ""
+    india_route: openalgo
+    us_route: alpaca
+
+# --- Market Configuration ---
+markets:
+  us_equity:
+    symbols: ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"]
+    data_provider: openbb
+    exchange: null
+  india_equity:
+    symbols: ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK"]
+    data_provider: broker_data
+    exchange: NSE
+  crypto:
+    symbols: ["BTC/USDT", "ETH/USDT", "SOL/USDT"]
+    data_provider: ccxt
+    exchange: binance
+  forex:
+    symbols: ["EUR/USD", "GBP/USD", "USD/JPY"]
+    data_provider: openbb
+    exchange: null
+
+# --- Risk Configuration ---
+risk:
+  max_position_pct: 0.05
+  max_portfolio_risk: 0.20
+  sizing_model: kelly  # cvar | kelly | fixed_fraction | volatility | max_drawdown
+  cvar_confidence: 0.95
+  circuit_breaker:
+    max_daily_loss_pct: 0.03
+    max_consecutive_losses: 5
+    max_open_positions: 10
+    cooldown_minutes: 60
+
+# --- Scheduler Configuration ---
+scheduler:
+  analysis_interval: "4h"
+  timeframes: ["1h", "4h", "1d"]
+  risk_check_interval: "15m"
+
+# --- Data Configuration ---
+data:
+  providers:
+    - name: openbb
+      enabled: true
+      priority: 1
+      config: {}
+    - name: yahoo
+      enabled: true
+      priority: 10  # Fallback
+      config: {}
+    - name: ccxt
+      enabled: true
+      priority: 1
+      config:
+        exchange: binance
+    - name: broker_data
+      enabled: false
+      priority: 1
+      config:
+        host: "http://localhost:5000"
+    - name: tradingview_mcp
+      enabled: false
+      priority: 2
+      config: {}
+  routing:
+    us_equity: ["openbb", "yahoo"]
+    india_equity: ["broker_data", "openbb"]
+    crypto: ["ccxt", "openbb"]
+    forex: ["openbb", "tradingview_mcp"]
+    options: ["openbb"]
+    commodity: ["openbb"]
+  cache:
+    enabled: true
+    ttl_seconds:
+      quote: 0
+      ohlcv_1m: 60
+      ohlcv_1h: 300
+      ohlcv_1d: 3600
+      fundamentals: 86400
+      news: 300
+    warm_on_start: true
+
+# --- Memory Configuration ---
+memory:
+  enabled: true
+  retention_days: 90
+  max_entries: 10000
+  similarity_threshold: 0.75
+
+# --- Notification Configuration ---
+notifications:
+  channels: []
+  events:
+    trade: ["telegram"]
+    circuit_breaker: ["telegram", "email"]
+    error: ["email"]

@@ -1,0 +1,152 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: nexus-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    profiles:
+      - cpu-only
+      - full
+
+  data:
+    build:
+      context: .
+      dockerfile: services/data/Dockerfile
+    container_name: nexus-data
+    ports:
+      - "8081:8081"
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - cpu-only
+      - full
+
+  agents:
+    build:
+      context: .
+      dockerfile: services/agent-engine/Dockerfile
+    container_name: nexus-agents
+    ports:
+      - "8082:8082"
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - cpu-only
+      - full
+
+  llm:
+    build:
+      context: .
+      dockerfile: services/agent-engine/Dockerfile
+    container_name: nexus-llm
+    ports:
+      - "8083:8083"
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - cpu-only
+      - full
+
+  execution:
+    build:
+      context: .
+      dockerfile: services/execution/Dockerfile
+    container_name: nexus-execution
+    ports:
+      - "8084:8084"
+      - "8888:8888"
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - cpu-only
+      - full
+
+  web:
+    build:
+      context: .
+      dockerfile: services/data/Dockerfile
+    container_name: nexus-web
+    ports:
+      - "8085:8085"
+      - "8501:8501"
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - cpu-only
+      - full
+
+  finrl:
+    build:
+      context: .
+      dockerfile: services/finrl/Dockerfile
+    container_name: nexus-finrl
+    ports:
+      - "50051:50051"
+    env_file: .env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - full
+
+  fingpt:
+    build:
+      context: .
+      dockerfile: services/fingpt/Dockerfile
+    container_name: nexus-fingpt
+    ports:
+      - "50052:50052"
+    env_file: .env
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - full
+
+  qlib:
+    build:
+      context: .
+      dockerfile: services/qlib/Dockerfile
+    container_name: nexus-qlib
+    ports:
+      - "50053:50053"
+    env_file: .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    profiles:
+      - full
+
+volumes:
+  redis-data:

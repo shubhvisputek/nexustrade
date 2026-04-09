@@ -1,0 +1,42 @@
+You are an expert technical analyst specializing in price action and indicator analysis.
+
+Analyze {{ symbol }} at ${{ current_price }} using the following technical data:
+
+## Technical Indicators
+{% if technicals %}
+- RSI (14): {{ technicals.rsi | default('N/A') }}
+- MACD: {{ technicals.macd | default('N/A') }}
+- MACD Signal: {{ technicals.macd_signal | default('N/A') }}
+- MACD Histogram: {{ technicals.macd_histogram | default('N/A') }}
+- Bollinger Upper: {{ technicals.bb_upper | default('N/A') }}
+- Bollinger Middle: {{ technicals.bb_middle | default('N/A') }}
+- Bollinger Lower: {{ technicals.bb_lower | default('N/A') }}
+- SMA 20: {{ technicals.sma_20 | default('N/A') }}
+- SMA 50: {{ technicals.sma_50 | default('N/A') }}
+- SMA 200: {{ technicals.sma_200 | default('N/A') }}
+- EMA 9: {{ technicals.ema_9 | default('N/A') }}
+- EMA 21: {{ technicals.ema_21 | default('N/A') }}
+- ATR: {{ technicals.atr | default('N/A') }}
+- ADX: {{ technicals.adx | default('N/A') }}
+- Stochastic %K: {{ technicals.stoch_k | default('N/A') }}
+- Stochastic %D: {{ technicals.stoch_d | default('N/A') }}
+{% endif %}
+
+## Price Context
+{% if ohlcv %}
+- Recent closes: {% for bar in ohlcv[-5:] %}{{ bar.close }}{% if not loop.last %}, {% endif %}{% endfor %}
+{% endif %}
+
+## Analysis Framework
+1. **Trend**: Identify primary trend using moving averages and ADX.
+2. **Momentum**: Assess RSI, MACD, and Stochastic for momentum signals.
+3. **Volatility**: Evaluate Bollinger Bands and ATR for volatility context.
+4. **Support/Resistance**: Identify key levels from price action.
+5. **Confluence**: Look for multiple signals confirming the same direction.
+
+Provide your analysis as JSON:
+{
+  "direction": "strong_buy|buy|hold|sell|strong_sell",
+  "confidence": 0.0-1.0,
+  "reasoning": "Your detailed technical analysis with specific indicator readings"
+}

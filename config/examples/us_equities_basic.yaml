@@ -1,0 +1,70 @@
+# Minimal US equity setup — paper trading with 3 agents
+log_level: INFO
+
+llm:
+  mode: hybrid
+  fast:
+    provider: ollama
+    model: "llama3:8b"
+    base_url: "http://localhost:11434"
+    temperature: 0.3
+    max_tokens: 2048
+  deep:
+    provider: anthropic
+    model: "claude-sonnet-4-20250514"
+    temperature: 0.7
+    max_tokens: 4096
+
+agents:
+  enabled:
+    - name: warren_buffett
+      source: ai_hedge_fund
+      enabled: true
+    - name: technical_analyst
+      source: ai_hedge_fund
+      enabled: true
+    - name: finbert_sentiment
+      source: finbert
+      enabled: true
+  aggregation_mode: weighted_confidence
+  min_confidence: 0.6
+  execution_mode: parallel
+
+execution:
+  mode: python
+  brokers:
+    - name: paper
+      enabled: true
+      markets: ["us_equity"]
+      config:
+        initial_cash: 100000.0
+        slippage_pct: 0.001
+
+markets:
+  us_equity:
+    symbols: ["AAPL", "MSFT", "GOOGL"]
+    data_provider: openbb
+
+risk:
+  max_position_pct: 0.05
+  sizing_model: kelly
+  circuit_breaker:
+    max_daily_loss_pct: 0.03
+    max_consecutive_losses: 5
+
+scheduler:
+  analysis_interval: "4h"
+  timeframes: ["1d"]
+
+data:
+  providers:
+    - name: openbb
+      enabled: true
+      priority: 1
+    - name: yahoo
+      enabled: true
+      priority: 10
+  routing:
+    us_equity: ["openbb", "yahoo"]
+  cache:
+    enabled: true

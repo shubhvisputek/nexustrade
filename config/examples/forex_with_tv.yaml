@@ -1,0 +1,72 @@
+# Forex with TradingView execution
+log_level: INFO
+
+llm:
+  mode: hybrid
+  fast:
+    provider: ollama
+    model: "llama3:8b"
+    base_url: "http://localhost:11434"
+    temperature: 0.3
+    max_tokens: 2048
+  deep:
+    provider: anthropic
+    model: "claude-sonnet-4-20250514"
+    temperature: 0.7
+    max_tokens: 4096
+
+agents:
+  enabled:
+    - name: technical_analyst
+      source: ai_hedge_fund
+      enabled: true
+    - name: bull_bear_debate
+      source: trading_agents_debate
+      enabled: true
+      config:
+        rounds: 3
+  aggregation_mode: weighted_confidence
+  min_confidence: 0.7
+  execution_mode: sequential
+
+execution:
+  mode: tradingview
+  brokers:
+    - name: paper
+      enabled: true
+      markets: ["forex"]
+      config:
+        initial_cash: 50000.0
+  tradingview:
+    enabled: true
+    webhook_port: 8888
+    passphrase: ""  # Set via NEXUS__EXECUTION__TRADINGVIEW__PASSPHRASE
+
+markets:
+  forex:
+    symbols: ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD"]
+    data_provider: openbb
+
+risk:
+  max_position_pct: 0.02
+  sizing_model: fixed_fraction
+  circuit_breaker:
+    max_daily_loss_pct: 0.02
+    max_consecutive_losses: 3
+
+scheduler:
+  analysis_interval: "4h"
+  timeframes: ["1h", "4h", "1d"]
+
+data:
+  providers:
+    - name: openbb
+      enabled: true
+      priority: 1
+    - name: tradingview_mcp
+      enabled: true
+      priority: 2
+  routing:
+    forex: ["openbb", "tradingview_mcp"]
+  cache:
+    enabled: true

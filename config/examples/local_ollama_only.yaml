@@ -1,0 +1,69 @@
+# Full local mode — no cloud APIs, Ollama only
+log_level: DEBUG
+
+llm:
+  mode: local
+  fast:
+    provider: ollama
+    model: "llama3:8b"
+    base_url: "http://localhost:11434"
+    temperature: 0.3
+    max_tokens: 2048
+  deep:
+    provider: ollama
+    model: "llama3:8b"
+    base_url: "http://localhost:11434"
+    temperature: 0.7
+    max_tokens: 4096
+  vision: null
+  fallbacks: []
+
+agents:
+  enabled:
+    - name: warren_buffett
+      source: ai_hedge_fund
+      enabled: true
+    - name: technical_analyst
+      source: ai_hedge_fund
+      enabled: true
+    - name: finbert_sentiment
+      source: finbert
+      enabled: true
+  aggregation_mode: majority
+  min_confidence: 0.5
+  execution_mode: sequential
+
+execution:
+  mode: python
+  brokers:
+    - name: paper
+      enabled: true
+      markets: ["us_equity"]
+      config:
+        initial_cash: 100000.0
+
+markets:
+  us_equity:
+    symbols: ["AAPL", "MSFT"]
+    data_provider: yahoo  # No API key needed
+
+risk:
+  max_position_pct: 0.05
+  sizing_model: fixed_fraction
+  circuit_breaker:
+    max_daily_loss_pct: 0.03
+    max_consecutive_losses: 5
+
+scheduler:
+  analysis_interval: "4h"
+  timeframes: ["1d"]
+
+data:
+  providers:
+    - name: yahoo
+      enabled: true
+      priority: 1
+  routing:
+    us_equity: ["yahoo"]
+  cache:
+    enabled: true

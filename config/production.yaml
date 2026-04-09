@@ -1,0 +1,12 @@
+# Production overrides
+log_level: WARNING
+
+risk:
+  circuit_breaker:
+    max_daily_loss_pct: 0.02
+    max_consecutive_losses: 3
+    cooldown_minutes: 120
+
+data:
+  cache:
+    warm_on_start: true

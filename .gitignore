@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Environment
+.env
+.env.local
+
+# Models (downloaded, not committed)
+models/finrl/*
+models/fingpt/*
+models/finbert/*
+
+# Data cache
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
+
+# uv
+uv.lock
