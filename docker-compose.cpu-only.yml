@@ -1,6 +1,24 @@
-# CPU-only override — excludes GPU services (finrl, fingpt)
-# Usage: docker compose -f docker-compose.yml --profile cpu-only up
+# Docker Compose override for CPU-only local testing.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.cpu-only.yml --profile cpu-only up
 #
-# This file is a reference. The main docker-compose.yml uses profiles:
-#   cpu-only: redis, data, agents, llm, execution, web, qlib
-#   full: all 9 services including GPU containers
+# This override ensures ML services use the CPU-only Dockerfiles (python:3.12-slim)
+# instead of the GPU-based PyTorch images, allowing local development without NVIDIA hardware.
+
+services:
+  finrl:
+    build:
+      context: .
+      dockerfile: services/finrl/Dockerfile
+    deploy: {}
+
+  fingpt:
+    build:
+      context: .
+      dockerfile: services/fingpt/Dockerfile
+    deploy: {}
+
+  qlib:
+    build:
+      context: .
+      dockerfile: services/qlib/Dockerfile
+    deploy: {}

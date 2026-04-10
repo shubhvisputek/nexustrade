@@ -1,18 +1,14 @@
-FROM python:3.12-slim AS base
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ && \
-    rm -rf /var/lib/apt/lists/*
-
-RUN pip install --no-cache-dir uv
-
+FROM python:3.12-slim
 WORKDIR /app
 
-COPY pyproject.toml ./
-COPY src/ ./src/
+COPY pyproject.toml README.md ./
+COPY src/ src/
+COPY config/ config/
 
-RUN uv sync --extra execution --no-dev
+RUN pip install --no-cache-dir uv && uv pip install --system ".[execution]"
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8084/health')" || exit 1
 
 EXPOSE 8084 8888
-
-CMD ["python", "-m", "nexustrade"]
+CMD ["python", "-m", "uvicorn", "nexustrade.web.app:app", "--host", "0.0.0.0", "--port", "8084"]

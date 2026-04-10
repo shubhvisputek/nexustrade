@@ -33,6 +33,15 @@ class OrderType(str, Enum):
     LIMIT = "limit"
     STOP = "stop"
     STOP_LIMIT = "stop_limit"
+    SPREAD = "spread"
+    STRADDLE = "straddle"
+    STRANGLE = "strangle"
+    IRON_CONDOR = "iron_condor"
+
+
+class OptionType(str, Enum):
+    CALL = "call"
+    PUT = "put"
 
 
 class OrderStatus(str, Enum):
@@ -81,6 +90,50 @@ def _serialize_value(obj: Any) -> Any:
     if isinstance(obj, Enum):
         return obj.value
     return obj
+
+
+# --- Options Models ---
+
+@dataclass
+class OptionGreeks(SerializableMixin):
+    delta: float
+    gamma: float
+    theta: float
+    vega: float
+    rho: float
+    iv: float  # implied volatility
+
+
+@dataclass
+class OptionContract(SerializableMixin):
+    symbol: str
+    underlying: str
+    option_type: OptionType
+    strike: float
+    expiry: datetime
+    greeks: OptionGreeks | None
+    bid: float
+    ask: float
+    last: float
+    volume: float
+    open_interest: float
+    source: str
+
+    def __post_init__(self) -> None:
+        if isinstance(self.option_type, str):
+            self.option_type = OptionType(self.option_type)
+
+
+@dataclass
+class OptionChain(SerializableMixin):
+    underlying: str
+    expiry: datetime
+    contracts: list[OptionContract]
+    timestamp: datetime
+    source: str
+
+    def __post_init__(self) -> None:
+        _validate_utc(self.timestamp)
 
 
 # --- Market Data Models ---
@@ -180,6 +233,11 @@ class TechnicalIndicators(SerializableMixin):
     stoch_d: float | None = None
     source: str = ""
     extra: dict[str, Any] = field(default_factory=dict)
+    option_delta: float | None = None
+    option_gamma: float | None = None
+    option_theta: float | None = None
+    option_vega: float | None = None
+    option_iv: float | None = None
 
     def __post_init__(self) -> None:
         _validate_utc(self.timestamp)
@@ -277,6 +335,7 @@ class Order(SerializableMixin):
     time_in_force: str = "GTC"
     strategy_name: str = ""
     metadata: dict[str, Any] = field(default_factory=dict)
+    legs: list[Order] | None = None
 
     def __post_init__(self) -> None:
         if isinstance(self.side, str):

@@ -3,7 +3,29 @@ name = "nexustrade"
 version = "0.1.0"
 description = "Unified open-source LLM trading platform"
 readme = "README.md"
-license = "MIT"
+license = "Apache-2.0"
+keywords = [
+    "trading", "algorithmic-trading", "llm", "ai-trading", "quantitative-finance",
+    "multi-agent", "hedge-fund", "backtesting", "paper-trading", "crypto-trading",
+    "stock-trading", "forex-trading", "options-trading", "indian-stocks", "nse",
+    "finrl", "finbert", "fingpt", "openbb", "ccxt", "alpaca", "zerodha",
+    "tradingview", "mcp", "deep-reinforcement-learning", "sentiment-analysis",
+    "risk-management", "portfolio-optimization", "autonomous-trading",
+    "ai-agents", "langchain", "ollama", "openai", "anthropic",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 requires-python = ">=3.12,<3.14"
 dependencies = [
     "pydantic>=2.9.0",
@@ -34,6 +56,7 @@ execution = [
     "ccxt>=4.4.0",
     "fastapi>=0.115.0",
     "uvicorn>=0.30.0",
+    "prometheus-client>=0.20.0",
 ]
 ml = [
     "torch>=2.2.0",
