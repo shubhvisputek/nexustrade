@@ -7,7 +7,7 @@ OpenAlgo REST API running on localhost (or a remote instance).
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import DataProviderInterface
@@ -88,9 +88,9 @@ class BrokerDataAdapter(DataProviderInterface):
             if isinstance(ts, str):
                 dt = datetime.fromisoformat(ts)
                 if dt.tzinfo is None:
-                    dt = dt.replace(tzinfo=timezone.utc)
+                    dt = dt.replace(tzinfo=UTC)
             elif isinstance(ts, (int, float)):
-                dt = datetime.fromtimestamp(ts / 1000, tz=timezone.utc)
+                dt = datetime.fromtimestamp(ts / 1000, tz=UTC)
             else:
                 continue
 
@@ -131,7 +131,7 @@ class BrokerDataAdapter(DataProviderInterface):
             ask=float(quote_data.get("ask", 0)),
             last=float(quote_data.get("ltp", 0) or quote_data.get("last", 0)),
             volume=float(quote_data.get("volume", 0)),
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             source="broker_data:openalgo",
         )
 

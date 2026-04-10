@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import BrokerBackendInterface
@@ -103,7 +103,7 @@ class CCXTBrokerBackend(BrokerBackendInterface):
             side=order.side,
             filled_qty=float(result.get("filled", order.quantity)),
             avg_price=float(result.get("average", result.get("price", order.price or 0.0))),
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             broker=self.name,
             status=self._map_status(result.get("status", "open")),
             fees=float(result.get("fee", {}).get("cost", 0.0)) if result.get("fee") else 0.0,

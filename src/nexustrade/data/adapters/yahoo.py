@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import DataProviderInterface
@@ -101,9 +101,9 @@ class YahooFinanceAdapter(DataProviderInterface):
                     # Ensure UTC-aware timestamp
                     bar_ts = ts.to_pydatetime()  # type: ignore[union-attr]
                     if bar_ts.tzinfo is None:
-                        bar_ts = bar_ts.replace(tzinfo=timezone.utc)
+                        bar_ts = bar_ts.replace(tzinfo=UTC)
                     else:
-                        bar_ts = bar_ts.astimezone(timezone.utc)
+                        bar_ts = bar_ts.astimezone(UTC)
 
                     bars.append(
                         OHLCV(
@@ -156,7 +156,7 @@ class YahooFinanceAdapter(DataProviderInterface):
                     ask=ask,
                     last=last,
                     volume=volume,
-                    timestamp=datetime.now(timezone.utc),
+                    timestamp=datetime.now(UTC),
                     source=self.name,
                 )
             except Exception:
@@ -184,9 +184,9 @@ class YahooFinanceAdapter(DataProviderInterface):
                 for article in raw_news[:limit]:
                     pub_ts = article.get("providerPublishTime")
                     if pub_ts is not None:
-                        ts = datetime.fromtimestamp(pub_ts, tz=timezone.utc)
+                        ts = datetime.fromtimestamp(pub_ts, tz=UTC)
                     else:
-                        ts = datetime.now(timezone.utc)
+                        ts = datetime.now(UTC)
 
                     items.append(
                         NewsItem(
@@ -272,6 +272,6 @@ class YahooFinanceAdapter(DataProviderInterface):
             ask=0.0,
             last=0.0,
             volume=0.0,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             source="yahoo",
         )

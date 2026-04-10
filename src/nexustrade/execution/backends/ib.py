@@ -9,7 +9,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import BrokerBackendInterface
@@ -20,9 +20,18 @@ logger = logging.getLogger(__name__)
 # Try ib_insync first, then the newer ib_async fork.
 try:
     from ib_insync import (  # type: ignore[import-untyped]
-        IB, MarketOrder, LimitOrder, StopOrder, StopLimitOrder,
+        IB,
+        Forex,
+        Future,
+        LimitOrder,
+        MarketOrder,
+        Option,
+        Stock,
+        StopLimitOrder,
+        StopOrder,
+    )
+    from ib_insync import (
         Trade as IBTrade,
-        Stock, Forex, Future, Option,
     )
 
     _HAS_IB = True
@@ -30,9 +39,18 @@ try:
 except ImportError:
     try:
         from ib_async import (  # type: ignore[import-untyped]
-            IB, MarketOrder, LimitOrder, StopOrder, StopLimitOrder,
+            IB,
+            Forex,
+            Future,
+            LimitOrder,
+            MarketOrder,
+            Option,
+            Stock,
+            StopLimitOrder,
+            StopOrder,
+        )
+        from ib_async import (
             Trade as IBTrade,
-            Stock, Forex, Future, Option,
         )
 
         _HAS_IB = True
@@ -158,7 +176,7 @@ class IBBackend(BrokerBackendInterface):
         )
 
         # Wait briefly for the order to fill (up to 5 seconds).
-        filled = await self._wait_for_fill(trade, timeout=5.0)
+        await self._wait_for_fill(trade, timeout=5.0)
 
         latency_ms = (time.monotonic() - start_ts) * 1000.0
 
@@ -178,7 +196,7 @@ class IBBackend(BrokerBackendInterface):
             side=order.side,
             filled_qty=filled_qty,
             avg_price=avg_price,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             broker="ib",
             status=status,
             fees=0.0,  # IB commissions are reported asynchronously

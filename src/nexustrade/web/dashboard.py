@@ -421,7 +421,12 @@ def page_health() -> None:
 
     # -- Log viewer placeholder -------------------------------------------------
     st.subheader("Log Viewer")
-    st.text_area("Recent logs", value="(Log streaming not yet connected.)", height=150, disabled=True)
+    st.text_area(
+        "Recent logs",
+        value="(Log streaming not yet connected.)",
+        height=150,
+        disabled=True,
+    )
 
     # -- Auto-refresh loop ------------------------------------------------------
     if auto_refresh:

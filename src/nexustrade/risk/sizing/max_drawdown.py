@@ -46,7 +46,11 @@ class MaxDrawdownModel(RiskModelInterface):
 
         # Current drawdown: how much have we already lost?
         # daily_pnl negative = we're in drawdown territory
-        current_drawdown_pct = abs(min(0.0, portfolio.daily_pnl)) / portfolio.total_value if portfolio.total_value > 0 else 0.0
+        current_drawdown_pct = (
+            abs(min(0.0, portfolio.daily_pnl)) / portfolio.total_value
+            if portfolio.total_value > 0
+            else 0.0
+        )
         remaining_drawdown_budget = max(0.0, max_drawdown_pct - current_drawdown_pct)
 
         if remaining_drawdown_budget <= 0:

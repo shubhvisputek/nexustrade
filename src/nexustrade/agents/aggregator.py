@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from nexustrade.core.models import AgentSignal, CompositeSignal, SignalDirection
 
@@ -70,7 +70,7 @@ class SignalAggregator:
                 contributing_signals=signals,
                 aggregation_mode=self.mode,
                 reasoning="No signals met the minimum confidence threshold.",
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now(UTC),
             )
 
         method = getattr(self, f"_aggregate_{self.mode}")
@@ -104,7 +104,7 @@ class SignalAggregator:
             contributing_signals=signals,
             aggregation_mode=self.mode,
             reasoning=reasoning,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
     def _aggregate_majority(
@@ -134,7 +134,7 @@ class SignalAggregator:
             contributing_signals=signals,
             aggregation_mode=self.mode,
             reasoning=reasoning,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
     def _aggregate_unanimous(
@@ -184,7 +184,7 @@ class SignalAggregator:
             contributing_signals=signals,
             aggregation_mode=self.mode,
             reasoning=reasoning,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
     def _aggregate_portfolio_manager(
@@ -209,5 +209,5 @@ class SignalAggregator:
             contributing_signals=signals,
             aggregation_mode=self.mode,
             reasoning=reasoning,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )

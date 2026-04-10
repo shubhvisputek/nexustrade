@@ -118,7 +118,9 @@ class RiskDebate:
         neutral_score = 0.5
 
         # Weighted synthesis (conservative has more weight for safety)
-        weights = config.get("debate_weights", {"aggressive": 0.25, "conservative": 0.40, "neutral": 0.35})
+        weights = config.get("debate_weights", {
+            "aggressive": 0.25, "conservative": 0.40, "neutral": 0.35,
+        })
         final_score = (
             aggressive_score * weights.get("aggressive", 0.25)
             + (1.0 - conservative_score) * weights.get("conservative", 0.40)

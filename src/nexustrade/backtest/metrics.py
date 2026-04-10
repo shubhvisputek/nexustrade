@@ -7,7 +7,7 @@ and other standard trading metrics.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 
@@ -87,12 +87,14 @@ def compute_metrics(
         # Sharpe ratio
         daily_rf = risk_free_rate / trading_days_per_year
         if daily_vol > 0:
-            metrics.sharpe_ratio = (mean_return - daily_rf) / daily_vol * math.sqrt(trading_days_per_year)
+            metrics.sharpe_ratio = (
+                (mean_return - daily_rf) / daily_vol
+                * math.sqrt(trading_days_per_year)
+            )
 
     # Max drawdown
     peak = equity_curve[0]
     max_dd = 0.0
-    dd_start = 0
     max_dd_duration = 0
     current_dd_start = 0
 

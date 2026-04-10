@@ -11,11 +11,11 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import BrokerBackendInterface
-from nexustrade.core.models import Fill, Order, OrderSide, OrderStatus, Position
+from nexustrade.core.models import Fill, Order, OrderStatus, Position
 
 
 class TradingViewBackend(BrokerBackendInterface):
@@ -55,7 +55,7 @@ class TradingViewBackend(BrokerBackendInterface):
     async def place_order(self, order: Order) -> Fill:
         """Generate a TradingView alert payload for the order."""
         order_id = uuid.uuid4().hex[:12]
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         alert_payload = {
             "passphrase": self._passphrase,

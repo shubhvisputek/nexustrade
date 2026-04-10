@@ -13,7 +13,7 @@ import json
 import logging
 import os
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import DataProviderInterface
@@ -172,7 +172,9 @@ class TradingViewMCPAdapter(DataProviderInterface):
 
     # -- DataProviderInterface implementation --
 
-    async def get_ohlcv(self, symbol: str, timeframe: str, start: datetime, end: datetime) -> list[OHLCV]:
+    async def get_ohlcv(
+        self, symbol: str, timeframe: str, start: datetime, end: datetime,
+    ) -> list[OHLCV]:
         """Get OHLCV data from TradingView chart."""
         client = await self._ensure_client()
 
@@ -180,7 +182,10 @@ class TradingViewMCPAdapter(DataProviderInterface):
         await client.call_tool("chart_set_symbol", {"symbol": symbol})
 
         # Map NexusTrade timeframes to TV format
-        tf_map = {"1m": "1", "5m": "5", "15m": "15", "1h": "60", "4h": "240", "1d": "D", "1w": "W"}
+        tf_map = {
+            "1m": "1", "5m": "5", "15m": "15",
+            "1h": "60", "4h": "240", "1d": "D", "1w": "W",
+        }
         tv_tf = tf_map.get(timeframe, timeframe)
         await client.call_tool("chart_set_timeframe", {"timeframe": tv_tf})
 
@@ -196,7 +201,7 @@ class TradingViewMCPAdapter(DataProviderInterface):
         bars = []
         for bar in result.get("bars", result.get("data", [])):
             try:
-                ts = datetime.fromtimestamp(bar.get("time", bar.get("timestamp", 0)), tz=timezone.utc)
+                ts = datetime.fromtimestamp(bar.get("time", bar.get("timestamp", 0)), tz=UTC)
                 bars.append(OHLCV(
                     timestamp=ts,
                     open=float(bar.get("open", 0)),
@@ -225,7 +230,7 @@ class TradingViewMCPAdapter(DataProviderInterface):
             raise RuntimeError(f"Failed to get quote for {symbol}: {result}")
 
         data = result.get("data", result)
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         return Quote(
             symbol=symbol,
@@ -243,8 +248,12 @@ class TradingViewMCPAdapter(DataProviderInterface):
 
         # Ensure we're on the right symbol/timeframe
         await client.call_tool("chart_set_symbol", {"symbol": symbol})
-        tf_map = {"1m": "1", "5m": "5", "15m": "15", "1h": "60", "4h": "240", "1d": "D", "1w": "W"}
-        await client.call_tool("chart_set_timeframe", {"timeframe": tf_map.get(timeframe, timeframe)})
+        tf_map = {
+            "1m": "1", "5m": "5", "15m": "15",
+            "1h": "60", "4h": "240", "1d": "D", "1w": "W",
+        }
+        tv_tf = tf_map.get(timeframe, timeframe)
+        await client.call_tool("chart_set_timeframe", {"timeframe": tv_tf})
         await asyncio.sleep(0.5)
 
         result = await client.call_tool("data_get_study_values", {})
@@ -252,7 +261,7 @@ class TradingViewMCPAdapter(DataProviderInterface):
             return None
 
         studies = result.get("studies", result.get("data", {}))
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Parse known indicators from study values
         ti = TechnicalIndicators(
@@ -293,8 +302,12 @@ class TradingViewMCPAdapter(DataProviderInterface):
         client = await self._ensure_client()
 
         await client.call_tool("chart_set_symbol", {"symbol": symbol})
-        tf_map = {"1m": "1", "5m": "5", "15m": "15", "1h": "60", "4h": "240", "1d": "D", "1w": "W"}
-        await client.call_tool("chart_set_timeframe", {"timeframe": tf_map.get(timeframe, timeframe)})
+        tf_map = {
+            "1m": "1", "5m": "5", "15m": "15",
+            "1h": "60", "4h": "240", "1d": "D", "1w": "W",
+        }
+        tv_tf = tf_map.get(timeframe, timeframe)
+        await client.call_tool("chart_set_timeframe", {"timeframe": tv_tf})
         await asyncio.sleep(1)
 
         result = await client.call_tool("capture_screenshot", {"region": "chart"})

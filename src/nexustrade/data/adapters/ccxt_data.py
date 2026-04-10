@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import DataProviderInterface
@@ -95,16 +95,16 @@ class CCXTDataAdapter(DataProviderInterface):
                 break
 
             for row in raw:
-                ts_ms, o, h, l, c, v = row[:6]
+                ts_ms, o, h, low, c, v = row[:6]
                 if ts_ms > end_ms:
                     break
                 bar = OHLCV(
                     timestamp=datetime.fromtimestamp(
-                        ts_ms / 1000, tz=timezone.utc
+                        ts_ms / 1000, tz=UTC
                     ),
                     open=float(o),
                     high=float(h),
-                    low=float(l),
+                    low=float(low),
                     close=float(c),
                     volume=float(v),
                     symbol=symbol,
@@ -133,7 +133,7 @@ class CCXTDataAdapter(DataProviderInterface):
             last=float(ticker.get("last") or 0.0),
             volume=float(ticker.get("baseVolume") or 0.0),
             timestamp=datetime.fromtimestamp(
-                (ticker.get("timestamp") or 0) / 1000, tz=timezone.utc
+                (ticker.get("timestamp") or 0) / 1000, tz=UTC
             ),
             source=f"ccxt:{self._exchange_id}",
         )

@@ -7,10 +7,9 @@ multi-service event consumption without duplicate processing.
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 from collections.abc import Awaitable, Callable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -147,7 +146,7 @@ class AsyncEventBus:
         """Helper to create a new Event with defaults."""
         return Event(
             event_type=event_type,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             payload=payload,
             source_service=source_service,
             correlation_id=correlation_id or uuid4().hex,

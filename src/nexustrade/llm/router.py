@@ -53,7 +53,8 @@ class LLMRouter:
     def _get_model_string(self, provider_config: LLMProviderConfig) -> str:
         """Build LiteLLM model string from provider config.
 
-        LiteLLM format: "provider/model" (e.g., "ollama/llama3:8b", "anthropic/claude-sonnet-4-20250514")
+        LiteLLM format: "provider/model"
+        (e.g., "ollama/llama3:8b", "anthropic/claude-sonnet-4-20250514")
         """
         provider = provider_config.provider
         model = provider_config.model
@@ -156,7 +157,10 @@ class LLMRouter:
 
     def _mock_response(self, messages: list[dict[str, str]]) -> str:
         """Generate a mock response when LiteLLM is not available."""
-        return '{"direction": "hold", "confidence": 0.5, "reasoning": "LLM not available — mock response"}'
+        return (
+            '{"direction": "hold", "confidence": 0.5,'
+            ' "reasoning": "LLM not available — mock response"}'
+        )
 
     def get_channel_config(self, channel: str) -> LLMProviderConfig | None:
         """Get the provider config for a channel."""

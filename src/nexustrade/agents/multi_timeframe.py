@@ -9,11 +9,11 @@ from __future__ import annotations
 import asyncio
 import logging
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 
 from nexustrade.core.interfaces import AgentInterface, DataProviderInterface
-from nexustrade.core.models import AgentSignal, MarketContext, OHLCV, SignalDirection
+from nexustrade.core.models import OHLCV, AgentSignal, MarketContext, SignalDirection
 
 logger = logging.getLogger(__name__)
 

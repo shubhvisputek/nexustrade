@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import DataProviderInterface
@@ -105,12 +105,12 @@ class OpenBBAdapter(DataProviderInterface):
                         elif hasattr(raw_date, "to_pydatetime"):
                             bar_ts = raw_date.to_pydatetime()
                         else:
-                            bar_ts = datetime.now(timezone.utc)
+                            bar_ts = datetime.now(UTC)
 
                     if bar_ts.tzinfo is None:
-                        bar_ts = bar_ts.replace(tzinfo=timezone.utc)
+                        bar_ts = bar_ts.replace(tzinfo=UTC)
                     else:
-                        bar_ts = bar_ts.astimezone(timezone.utc)
+                        bar_ts = bar_ts.astimezone(UTC)
 
                     bars.append(
                         OHLCV(
@@ -167,7 +167,7 @@ class OpenBBAdapter(DataProviderInterface):
                     ask=ask,
                     last=last,
                     volume=volume,
-                    timestamp=datetime.now(timezone.utc),
+                    timestamp=datetime.now(UTC),
                     source=self.name,
                 )
             except Exception:
@@ -213,10 +213,10 @@ class OpenBBAdapter(DataProviderInterface):
                     elif isinstance(raw_date, datetime):
                         ts = raw_date
                     else:
-                        ts = datetime.now(timezone.utc)
+                        ts = datetime.now(UTC)
 
                     if ts.tzinfo is None:
-                        ts = ts.replace(tzinfo=timezone.utc)
+                        ts = ts.replace(tzinfo=UTC)
 
                     items.append(
                         NewsItem(
@@ -322,7 +322,7 @@ class OpenBBAdapter(DataProviderInterface):
                 return TechnicalIndicators(
                     symbol=symbol,
                     timeframe=timeframe,
-                    timestamp=datetime.now(timezone.utc),
+                    timestamp=datetime.now(UTC),
                     rsi=indicators.get("rsi"),
                     macd=indicators.get("macd"),
                     macd_signal=indicators.get("macd_signal"),
@@ -361,6 +361,6 @@ class OpenBBAdapter(DataProviderInterface):
             ask=0.0,
             last=0.0,
             volume=0.0,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             source="openbb",
         )

@@ -7,12 +7,12 @@ Gracefully degrades if prometheus_client is not installed.
 from __future__ import annotations
 
 import time
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Generator
+from typing import Any
 
 try:
     from prometheus_client import (
-        CONTENT_TYPE_LATEST,
         Counter,
         Gauge,
         Histogram,
@@ -28,7 +28,7 @@ except ImportError:
 class _NoOp:
     """No-op stub that silently ignores all metric operations."""
 
-    def labels(self, *args: Any, **kwargs: Any) -> "_NoOp":
+    def labels(self, *args: Any, **kwargs: Any) -> _NoOp:
         return self
 
     def inc(self, amount: float = 1) -> None:

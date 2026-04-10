@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
 
 from nexustrade.core.interfaces import BrokerBackendInterface
 from nexustrade.core.models import Fill, Order
@@ -43,7 +42,10 @@ class ExecutionEngine:
         tv_broker_name: str = "tradingview",
     ) -> None:
         if mode not in ("python", "tradingview", "both"):
-            raise ValueError(f"Invalid execution mode: {mode!r}. Must be 'python', 'tradingview', or 'both'")
+            raise ValueError(
+                f"Invalid execution mode: {mode!r}."
+                " Must be 'python', 'tradingview', or 'both'"
+            )
 
         self._mode = mode
         self._brokers = brokers or {}

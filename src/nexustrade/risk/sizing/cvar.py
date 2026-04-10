@@ -32,7 +32,10 @@ class CVaRModel(RiskModelInterface):
     ) -> RiskAssessment:
         current_price = market_data.get("current_price", 0.0)
         atr = market_data.get("atr", current_price * 0.02)
-        daily_volatility = market_data.get("daily_volatility", atr / current_price if current_price > 0 else 0.02)
+        daily_volatility = market_data.get(
+            "daily_volatility",
+            atr / current_price if current_price > 0 else 0.02,
+        )
 
         # Config
         confidence_level = config.get("confidence_level", 0.95)

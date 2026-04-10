@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from nexustrade.core.models import Fill, OrderSide, OrderStatus, PortfolioState
+from nexustrade.core.models import Fill, OrderStatus, PortfolioState
 
 
 class CircuitBreaker:
@@ -65,13 +65,17 @@ class CircuitBreaker:
         # Check consecutive losses
         if self._consecutive_losses >= self.max_consecutive_losses:
             self._trigger(
-                f"Consecutive losses ({self._consecutive_losses}) reached max ({self.max_consecutive_losses})"
+                f"Consecutive losses ({self._consecutive_losses})"
+                f" reached max ({self.max_consecutive_losses})"
             )
             return False, self._trigger_reason
 
         # Check open positions
         if len(portfolio.positions) > self.max_open_positions:
-            return False, f"Too many open positions ({len(portfolio.positions)} > {self.max_open_positions})"
+            return False, (
+                f"Too many open positions"
+                f" ({len(portfolio.positions)} > {self.max_open_positions})"
+            )
 
         return True, None
 

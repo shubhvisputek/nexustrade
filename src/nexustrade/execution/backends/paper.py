@@ -7,7 +7,7 @@ with a configurable commission.  No external services required.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import BrokerBackendInterface
@@ -64,12 +64,15 @@ class PaperBackend(BrokerBackendInterface):
     async def place_order(self, order: Order) -> Fill:
         """Execute *order* immediately with simulated slippage and commission."""
         order_id = uuid.uuid4().hex[:12]
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         # Determine base price
         base_price = order.price if order.price is not None else 0.0
         if base_price <= 0:
-            raise RuntimeError("Paper backend requires order.price to be set (simulated current price)")
+            raise RuntimeError(
+                "Paper backend requires order.price to be set"
+                " (simulated current price)"
+            )
 
         # Apply slippage
         if order.side == OrderSide.BUY:

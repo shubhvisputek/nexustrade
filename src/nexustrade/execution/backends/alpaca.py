@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import BrokerBackendInterface
@@ -20,7 +20,7 @@ try:
     from alpaca.trading.client import TradingClient
     from alpaca.trading.enums import OrderSide as AlpacaSide
     from alpaca.trading.enums import TimeInForce
-    from alpaca.trading.requests import MarketOrderRequest, LimitOrderRequest
+    from alpaca.trading.requests import LimitOrderRequest, MarketOrderRequest
 
     _HAS_ALPACA = True
 except ImportError:  # pragma: no cover
@@ -111,7 +111,7 @@ class AlpacaBackend(BrokerBackendInterface):
             side=order.side,
             filled_qty=float(result.filled_qty or order.quantity),
             avg_price=float(result.filled_avg_price or order.price or 0.0),
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             broker="alpaca",
             status=self._map_status(str(result.status)),
             fees=0.0,

@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 
 
-class ForexSession(str, Enum):
+class ForexSession(StrEnum):
     ASIAN = "asian"  # Tokyo: 00:00-09:00 UTC
     LONDON = "london"  # 08:00-17:00 UTC
     NEW_YORK = "new_york"  # 13:00-22:00 UTC
@@ -103,7 +103,7 @@ def get_current_session(utc_time: datetime | None = None) -> list[ForexSession]:
       - Overlap London-NY: 13:00 - 17:00 (subset)
     """
     if utc_time is None:
-        utc_time = datetime.now(timezone.utc)
+        utc_time = datetime.now(UTC)
 
     hour = utc_time.hour
     sessions: list[ForexSession] = []

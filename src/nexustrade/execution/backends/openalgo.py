@@ -7,13 +7,13 @@ order execution (Zerodha, Dhan, Angel One, etc.).
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
 
 from nexustrade.core.interfaces import BrokerBackendInterface
-from nexustrade.core.models import Fill, Order, OrderSide, OrderStatus, Position
+from nexustrade.core.models import Fill, Order, OrderStatus, Position
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +87,7 @@ class OpenAlgoBackend(BrokerBackendInterface):
             side=order.side,
             filled_qty=order.quantity,
             avg_price=order.price or 0.0,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             broker="openalgo",
             status=self._map_status(status_str),
             fees=0.0,

@@ -8,13 +8,13 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Any
 
 from nexustrade.backtest.metrics import BacktestMetrics, compute_metrics
 from nexustrade.core.models import (
-    OHLCV, AgentSignal, Fill, Order, OrderSide, OrderType, Position,
-    PortfolioState, SignalDirection,
+    OHLCV,
+    PortfolioState,
+    Position,
 )
 
 logger = logging.getLogger(__name__)

@@ -8,14 +8,13 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import Enum, StrEnum
 from typing import Any
-
 
 # --- Enums ---
 
-class SignalDirection(str, Enum):
+class SignalDirection(StrEnum):
     STRONG_BUY = "strong_buy"
     BUY = "buy"
     HOLD = "hold"
@@ -23,12 +22,12 @@ class SignalDirection(str, Enum):
     STRONG_SELL = "strong_sell"
 
 
-class OrderSide(str, Enum):
+class OrderSide(StrEnum):
     BUY = "buy"
     SELL = "sell"
 
 
-class OrderType(str, Enum):
+class OrderType(StrEnum):
     MARKET = "market"
     LIMIT = "limit"
     STOP = "stop"
@@ -39,12 +38,12 @@ class OrderType(str, Enum):
     IRON_CONDOR = "iron_condor"
 
 
-class OptionType(str, Enum):
+class OptionType(StrEnum):
     CALL = "call"
     PUT = "put"
 
 
-class OrderStatus(str, Enum):
+class OrderStatus(StrEnum):
     PENDING = "pending"
     FILLED = "filled"
     PARTIAL = "partial"
@@ -55,7 +54,7 @@ class OrderStatus(str, Enum):
 # --- Validation helpers ---
 
 def _validate_utc(ts: datetime) -> None:
-    if ts.tzinfo is None or ts.utcoffset() != timezone.utc.utcoffset(None):
+    if ts.tzinfo is None or ts.utcoffset() != UTC.utcoffset(None):
         raise ValueError(f"Timestamp must be UTC timezone-aware, got {ts!r}")
 
 
@@ -160,7 +159,7 @@ class OHLCV(SerializableMixin):
         if isinstance(d["timestamp"], str):
             d["timestamp"] = datetime.fromisoformat(d["timestamp"])
             if d["timestamp"].tzinfo is None:
-                d["timestamp"] = d["timestamp"].replace(tzinfo=timezone.utc)
+                d["timestamp"] = d["timestamp"].replace(tzinfo=UTC)
         return cls(**d)
 
 
@@ -183,7 +182,7 @@ class Quote(SerializableMixin):
         if isinstance(d["timestamp"], str):
             d["timestamp"] = datetime.fromisoformat(d["timestamp"])
             if d["timestamp"].tzinfo is None:
-                d["timestamp"] = d["timestamp"].replace(tzinfo=timezone.utc)
+                d["timestamp"] = d["timestamp"].replace(tzinfo=UTC)
         return cls(**d)
 
 
@@ -206,7 +205,7 @@ class NewsItem(SerializableMixin):
         if isinstance(d["timestamp"], str):
             d["timestamp"] = datetime.fromisoformat(d["timestamp"])
             if d["timestamp"].tzinfo is None:
-                d["timestamp"] = d["timestamp"].replace(tzinfo=timezone.utc)
+                d["timestamp"] = d["timestamp"].replace(tzinfo=UTC)
         return cls(**d)
 
 
@@ -252,7 +251,7 @@ class AgentSignal(SerializableMixin):
     reasoning: str
     agent_name: str
     agent_type: str  # "persona", "debate", "rl", "sentiment", "vision", "factor"
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -267,7 +266,7 @@ class AgentSignal(SerializableMixin):
         if isinstance(d.get("timestamp"), str):
             d["timestamp"] = datetime.fromisoformat(d["timestamp"])
             if d["timestamp"].tzinfo is None:
-                d["timestamp"] = d["timestamp"].replace(tzinfo=timezone.utc)
+                d["timestamp"] = d["timestamp"].replace(tzinfo=UTC)
         if isinstance(d.get("direction"), str):
             d["direction"] = SignalDirection(d["direction"])
         return cls(**d)
@@ -418,5 +417,5 @@ class Event(SerializableMixin):
         if isinstance(d["timestamp"], str):
             d["timestamp"] = datetime.fromisoformat(d["timestamp"])
             if d["timestamp"].tzinfo is None:
-                d["timestamp"] = d["timestamp"].replace(tzinfo=timezone.utc)
+                d["timestamp"] = d["timestamp"].replace(tzinfo=UTC)
         return cls(**d)

@@ -8,7 +8,7 @@ unavailable the adapter returns a HOLD signal.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from nexustrade.core.interfaces import AgentInterface
@@ -72,7 +72,7 @@ class FinGPTSentimentAdapter(AgentInterface):
             ),
             agent_name=self.name,
             agent_type=self.agent_type,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
         )
 
     def get_capabilities(self) -> dict[str, Any]:

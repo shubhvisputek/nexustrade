@@ -1,6 +1,5 @@
 """NexusTrade CLI — unified LLM trading platform."""
 
-from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -43,8 +42,6 @@ def backtest(
     end: str = typer.Option(..., "--to", help="End date (YYYY-MM-DD)"),
 ) -> None:
     """Run a backtest on historical data."""
-    from nexustrade.backtest.engine import BacktestEngine
-    from nexustrade.backtest.report import format_report
     from nexustrade.strategy.parser import parse_strategy
 
     console.print(f"[bold]Backtest:[/] {strategy}")
@@ -57,7 +54,10 @@ def backtest(
         console.print(f"[red]Error loading strategy: {e}[/]")
         raise typer.Exit(1)
 
-    console.print("[yellow]Full backtest with data pipeline not yet wired. Use API for programmatic backtests.[/]")
+    console.print(
+        "[yellow]Full backtest with data pipeline not yet wired."
+        " Use API for programmatic backtests.[/]"
+    )
 
 
 @app.command()
@@ -164,7 +164,10 @@ def plugins_list() -> None:
         table.add_row("notification", name)
 
     if not any([registry.data_providers, registry.brokers, registry.agents]):
-        console.print("[yellow]No plugins discovered. Install extras: uv sync --extra agents --extra data --extra execution[/]")
+        console.print(
+            "[yellow]No plugins discovered. Install extras:"
+            " uv sync --extra agents --extra data --extra execution[/]"
+        )
     else:
         console.print(table)
 

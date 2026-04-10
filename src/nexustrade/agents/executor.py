@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
 
 from nexustrade.core.interfaces import AgentInterface
 from nexustrade.core.models import AgentSignal, MarketContext

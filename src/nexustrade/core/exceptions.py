@@ -29,7 +29,7 @@ class RiskCheckError(NexusTradeError):
     """A risk check has failed."""
 
 
-class CircuitBreakerTriggered(NexusTradeError):
+class CircuitBreakerError(NexusTradeError):
     """Circuit breaker has been activated."""
 
 

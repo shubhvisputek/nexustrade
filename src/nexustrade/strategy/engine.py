@@ -14,7 +14,7 @@ from typing import Any
 from nexustrade.core.interfaces import StrategyInterface
 from nexustrade.core.models import AgentSignal, MarketContext, Position
 from nexustrade.strategy.conditions import evaluate_condition
-from nexustrade.strategy.parser import StrategyDefinition, StrategyRule, parse_strategy
+from nexustrade.strategy.parser import StrategyDefinition, parse_strategy
 
 logger = logging.getLogger(__name__)
 

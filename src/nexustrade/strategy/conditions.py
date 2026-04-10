@@ -9,7 +9,7 @@ from __future__ import annotations
 import operator
 from typing import Any
 
-from nexustrade.core.models import AgentSignal, MarketContext, TechnicalIndicators
+from nexustrade.core.models import AgentSignal, MarketContext
 
 OPERATORS = {
     ">": operator.gt,

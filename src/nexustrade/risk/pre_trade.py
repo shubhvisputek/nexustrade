@@ -68,7 +68,8 @@ class PreTradeValidator:
             exposure_ratio = new_exposure / portfolio.total_value
             if exposure_ratio > self.max_portfolio_risk:
                 warnings.append(
-                    f"Portfolio exposure {exposure_ratio:.1%} would exceed max {self.max_portfolio_risk:.1%}"
+                    f"Portfolio exposure {exposure_ratio:.1%}"
+                    f" would exceed max {self.max_portfolio_risk:.1%}"
                 )
                 # This is a warning, not a hard reject unless significantly over
                 if exposure_ratio > self.max_portfolio_risk * 1.5:

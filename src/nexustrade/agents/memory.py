@@ -6,9 +6,8 @@ for retrieval of similar historical situations during agent analysis.
 
 from __future__ import annotations
 
-import json
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 from uuid import uuid4
 
@@ -97,7 +96,7 @@ class MarketMemory:
             "symbol": symbol,
             "signal_direction": signal_direction,
             "confidence": confidence,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             **(metadata or {}),
         }
         if outcome:
@@ -213,7 +212,7 @@ class MarketMemory:
 
     async def prune_expired(self) -> int:
         """Remove entries older than retention_days. Returns count removed."""
-        cutoff = datetime.now(timezone.utc) - timedelta(days=self._retention_days)
+        cutoff = datetime.now(UTC) - timedelta(days=self._retention_days)
         cutoff_iso = cutoff.isoformat()
 
         if self._available and self._collection is not None:
