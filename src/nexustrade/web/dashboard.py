@@ -28,7 +28,7 @@ API_URL = os.environ.get("NEXUSTRADE_API_URL", "http://localhost:8085")
 # ---------------------------------------------------------------------------
 
 
-def api_get(path: str, params: dict[str, Any] | None = None) -> dict | list | None:
+def api_get(path: str, params: dict[str, Any] | None = None) -> dict[str, Any] | None:
     """Perform a GET request against the FastAPI backend.
 
     Returns the parsed JSON on success, or ``None`` when the backend is

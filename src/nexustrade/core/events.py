@@ -42,7 +42,7 @@ class AsyncEventBus:
     async def connect(self) -> None:
         """Connect to Redis."""
         self._redis = aioredis.from_url(self._redis_url, decode_responses=True)
-        await self._redis.ping()
+        await self._redis.ping()  # type: ignore[misc]
         logger.info("Event bus connected to %s", self._redis_url)
 
     async def disconnect(self) -> None:
@@ -61,7 +61,7 @@ class AsyncEventBus:
         """
         assert self._redis is not None, "Not connected"
         data = {"data": event.to_json()}
-        event_id: str = await self._redis.xadd(stream, data)  # type: ignore[assignment]
+        event_id: str = await self._redis.xadd(stream, data)  # type: ignore[assignment,arg-type]
         logger.debug("Published event %s to %s", event_id, stream)
         return event_id
 

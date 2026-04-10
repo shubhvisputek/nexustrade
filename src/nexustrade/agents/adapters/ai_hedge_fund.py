@@ -170,7 +170,7 @@ class PersonaAgent(AgentInterface):
             else:
                 text = str(response)
 
-            return _parse_signal_response(text, self._agent_name)
+            return _parse_signal_response(str(text), self._agent_name)
 
         except FileNotFoundError:
             logger.warning(

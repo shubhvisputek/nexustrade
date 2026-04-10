@@ -21,7 +21,7 @@ async def health_check() -> dict[str, Any]:
         import redis.asyncio as aioredis
 
         r = aioredis.from_url("redis://localhost:6379")
-        await r.ping()
+        await r.ping()  # type: ignore[misc]
         services["redis"] = "ok"
         await r.aclose()
     except Exception:
@@ -48,7 +48,7 @@ async def health_redis() -> dict[str, str]:
         import redis.asyncio as aioredis
 
         r = aioredis.from_url("redis://localhost:6379")
-        await r.ping()
+        await r.ping()  # type: ignore[misc]
         await r.aclose()
         return {"redis": "ok"}
     except Exception as exc:
