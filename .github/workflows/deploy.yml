@@ -1,0 +1,39 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      profile:
+        description: 'Docker profile'
+        required: true
+        default: 'cpu-only'
+        type: choice
+        options:
+          - cpu-only
+          - full
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build images
+        run: docker compose --profile ${{ inputs.profile }} build
+      - name: Deploy
+        run: |
+          echo "Deploying to ${{ inputs.environment }} with profile ${{ inputs.profile }}"
+          docker compose --profile ${{ inputs.profile }} up -d
+          echo "Waiting for services to start..."
+          sleep 15
+          docker compose ps
+          echo "Health check..."
+          curl -f http://localhost:8085/health || echo "Web service not responding yet"

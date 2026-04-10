@@ -1,0 +1,171 @@
+[project]
+name = "nexustrade"
+version = "0.1.0"
+description = "Unified open-source LLM trading platform"
+readme = "README.md"
+license = "Apache-2.0"
+keywords = [
+    "trading", "algorithmic-trading", "llm", "ai-trading", "quantitative-finance",
+    "multi-agent", "hedge-fund", "backtesting", "paper-trading", "crypto-trading",
+    "stock-trading", "forex-trading", "options-trading", "indian-stocks", "nse",
+    "finrl", "finbert", "fingpt", "openbb", "ccxt", "alpaca", "zerodha",
+    "tradingview", "mcp", "deep-reinforcement-learning", "sentiment-analysis",
+    "risk-management", "portfolio-optimization", "autonomous-trading",
+    "ai-agents", "langchain", "ollama", "openai", "anthropic",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "pydantic>=2.9.0",
+    "pydantic-settings>=2.5.0",
+    "pyyaml>=6.0",
+    "redis>=5.0.0",
+    "jinja2>=3.1.0",
+    "typer>=0.12.0",
+    "rich>=13.7.0",
+    "httpx>=0.27.0",
+    "tenacity>=9.0.0",
+]
+
+[project.optional-dependencies]
+agents = [
+    "langgraph>=0.2.0",
+    "langchain-core>=0.3.0",
+    "litellm>=1.50.0",
+    "chromadb>=0.5.0",
+]
+data = [
+    "openbb>=4.3.0",
+    "yfinance>=0.2.40",
+    "ccxt>=4.4.0",
+]
+execution = [
+    "alpaca-py>=0.30.0",
+    "ccxt>=4.4.0",
+    "fastapi>=0.115.0",
+    "uvicorn>=0.30.0",
+    "prometheus-client>=0.20.0",
+]
+ml = [
+    "torch>=2.2.0",
+    "transformers>=4.44.0",
+    "peft>=0.12.0",
+    "stable-baselines3>=2.3.0",
+    "gymnasium>=0.29.0",
+]
+# qlib extra excluded — qlib runs in its own Docker container with separate deps
+# qlib = ["qlib>=0.9.6"]
+web = ["streamlit>=1.38.0"]
+notifications = [
+    "python-telegram-bot>=21.0",
+    "aiosmtplib>=3.0",
+]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.6.0",
+    "mypy>=1.11.0",
+    "types-PyYAML>=6.0",
+]
+all = ["nexustrade[agents,data,execution,web,notifications,dev]"]
+
+[project.scripts]
+nexus = "nexustrade.cli.main:app"
+
+[project.entry-points."nexustrade.data"]
+openbb = "nexustrade.data.adapters.openbb_adapter:OpenBBAdapter"
+tradingview_mcp = "nexustrade.data.adapters.tradingview_mcp:TradingViewMCPAdapter"
+ccxt = "nexustrade.data.adapters.ccxt_data:CCXTDataAdapter"
+broker_data = "nexustrade.data.adapters.broker_data:BrokerDataAdapter"
+yahoo = "nexustrade.data.adapters.yahoo:YahooFinanceAdapter"
+
+[project.entry-points."nexustrade.brokers"]
+alpaca = "nexustrade.execution.backends.alpaca:AlpacaBackend"
+openalgo = "nexustrade.execution.backends.openalgo:OpenAlgoBackend"
+ccxt_broker = "nexustrade.execution.backends.ccxt_broker:CCXTBrokerBackend"
+ib = "nexustrade.execution.backends.ib:IBBackend"
+paper = "nexustrade.execution.backends.paper:PaperBackend"
+tradingview = "nexustrade.execution.backends.tradingview:TradingViewBackend"
+
+[project.entry-points."nexustrade.agents"]
+ai_hedge_fund = "nexustrade.agents.adapters.ai_hedge_fund:AIHedgeFundAgentGroup"
+trading_agents_debate = "nexustrade.agents.adapters.trading_agents:TradingAgentsDebateAdapter"
+finrl = "nexustrade.agents.adapters.finrl_agent:FinRLAgentAdapter"
+fingpt = "nexustrade.agents.adapters.fingpt_sentiment:FinGPTSentimentAdapter"
+finbert = "nexustrade.agents.adapters.finbert_agent:FinBERTAdapter"
+quantagent = "nexustrade.agents.adapters.quantagent_vision:QuantAgentVisionAdapter"
+qlib_alpha = "nexustrade.agents.adapters.qlib_alpha:QlibAlphaAdapter"
+
+[project.entry-points."nexustrade.notifications"]
+telegram = "nexustrade.notifications.telegram:TelegramNotifier"
+discord = "nexustrade.notifications.discord:DiscordNotifier"
+email = "nexustrade.notifications.email:EmailNotifier"
+webhook = "nexustrade.notifications.webhook:WebhookNotifier"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nexustrade"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+mypy_path = "src"
+warn_return_any = false
+warn_unused_ignores = false
+disallow_untyped_defs = false
+disallow_untyped_calls = false
+check_untyped_defs = true
+disallow_any_generics = false
+
+[[tool.mypy.overrides]]
+module = [
+    "nexustrade.web.dashboard",
+    "nexustrade.agents.memory",
+    "nexustrade.agents.multi_timeframe",
+    "nexustrade.execution.engine",
+    "nexustrade.execution.backends.*",
+    "nexustrade.data.adapters.*",
+    "nexustrade.risk.*",
+    "nexustrade.backtest.*",
+    "nexustrade.strategy.*",
+    "nexustrade.core.models",
+    "nexustrade.core.registry",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = ["yaml", "yaml.*"]
+ignore_missing_imports = true
+follow_untyped_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "unit: runs without any external service",
+    "integration: needs Redis, maybe Ollama, maybe broker APIs",
+    "e2e: needs full stack running",
+    "slow: takes > 30 seconds (LLM calls)",
+]

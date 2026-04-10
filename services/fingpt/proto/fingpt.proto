@@ -1,0 +1,16 @@
+syntax = "proto3";
+package fingpt;
+
+service FinGPTService {
+  rpc AnalyzeSentiment(SentimentRequest) returns (SentimentResponse);
+}
+
+message SentimentRequest {
+  repeated string headlines = 1;
+  string model_name = 2;
+}
+
+message SentimentResponse {
+  repeated float scores = 1;
+  repeated string labels = 2;
+}

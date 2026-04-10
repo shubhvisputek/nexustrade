@@ -1,0 +1,40 @@
+# Basic strategy example — RSI + agent signals
+name: rsi_agent_combo
+version: "1.0"
+description: Buy when RSI is oversold AND agents agree, sell when overbought
+
+rules:
+  - name: rsi_oversold_buy
+    description: Enter when RSI < 30 and at least 2 agents say buy
+    symbols: ["AAPL", "MSFT", "GOOGL"]
+    entry_conditions:
+      - type: indicator
+        name: rsi
+        timeframe: "1d"
+        op: "<"
+        value: 30
+      - type: signal_count
+        direction: buy
+        min_count: 2
+    exit_conditions:
+      - type: indicator
+        name: rsi
+        timeframe: "1d"
+        op: ">"
+        value: 70
+
+  - name: strong_agent_consensus
+    description: Enter when all agents strongly agree
+    entry_conditions:
+      - type: signal_count
+        direction: buy
+        min_count: 3
+    exit_conditions:
+      - type: signal_count
+        direction: sell
+        min_count: 2
+
+defaults:
+  timeframes: ["1d"]
+  risk_overrides:
+    max_position_pct: 0.04

@@ -1,0 +1,13 @@
+# Development overrides — paper trading, verbose logging
+log_level: DEBUG
+
+execution:
+  mode: python
+  brokers:
+    - name: paper
+      enabled: true
+      markets: ["us_equity", "india_equity", "crypto", "forex"]
+      config:
+        initial_cash: 100000.0
+        slippage_pct: 0.0
+        commission_pct: 0.0

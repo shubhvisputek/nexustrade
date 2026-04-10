@@ -1,0 +1,70 @@
+# Crypto on Binance — paper trading
+log_level: INFO
+
+llm:
+  mode: local
+  fast:
+    provider: ollama
+    model: "llama3:8b"
+    base_url: "http://localhost:11434"
+    temperature: 0.3
+    max_tokens: 2048
+  deep:
+    provider: ollama
+    model: "llama3:8b"
+    base_url: "http://localhost:11434"
+    temperature: 0.7
+    max_tokens: 4096
+
+agents:
+  enabled:
+    - name: technical_analyst
+      source: ai_hedge_fund
+      enabled: true
+    - name: finbert_sentiment
+      source: finbert
+      enabled: true
+  aggregation_mode: majority
+  min_confidence: 0.55
+  execution_mode: parallel
+
+execution:
+  mode: python
+  brokers:
+    - name: ccxt_broker
+      enabled: true
+      markets: ["crypto"]
+      config:
+        exchange: binance
+        sandbox: true
+        api_key: null
+        secret: null
+
+markets:
+  crypto:
+    symbols: ["BTC/USDT", "ETH/USDT", "SOL/USDT"]
+    data_provider: ccxt
+    exchange: binance
+
+risk:
+  max_position_pct: 0.03
+  sizing_model: volatility
+  circuit_breaker:
+    max_daily_loss_pct: 0.05
+    max_consecutive_losses: 4
+
+scheduler:
+  analysis_interval: "1h"
+  timeframes: ["15m", "1h", "4h"]
+
+data:
+  providers:
+    - name: ccxt
+      enabled: true
+      priority: 1
+      config:
+        exchange: binance
+  routing:
+    crypto: ["ccxt"]
+  cache:
+    enabled: true

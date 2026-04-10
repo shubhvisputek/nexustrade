@@ -1,0 +1,47 @@
+[
+  {
+    "direction": "buy",
+    "confidence": 0.82,
+    "reasoning": "Strong fundamentals with consistent revenue growth, high margins, and significant cash reserves. Current price-to-earnings ratio remains attractive relative to sector peers. Long-term competitive moat through ecosystem lock-in.",
+    "agent_name": "warren_buffett",
+    "agent_type": "persona",
+    "timestamp": "2024-01-15T12:00:00Z",
+    "metadata": {}
+  },
+  {
+    "direction": "sell",
+    "confidence": 0.71,
+    "reasoning": "RSI at 72 indicates overbought conditions. MACD showing bearish divergence on the daily chart. Price approaching upper Bollinger Band with declining volume, suggesting potential reversal.",
+    "agent_name": "technical_analyst",
+    "agent_type": "quant",
+    "timestamp": "2024-01-15T12:05:00Z",
+    "metadata": {}
+  },
+  {
+    "direction": "buy",
+    "confidence": 0.68,
+    "reasoning": "Sentiment analysis of recent news articles and earnings call transcripts shows overwhelmingly positive tone. FinBERT classification: 78% positive, 15% neutral, 7% negative across 50 recent documents.",
+    "agent_name": "finbert",
+    "agent_type": "nlp",
+    "timestamp": "2024-01-15T12:10:00Z",
+    "metadata": {}
+  },
+  {
+    "direction": "hold",
+    "confidence": 0.55,
+    "reasoning": "Bull case: strong product pipeline and services growth trajectory. Bear case: regulatory headwinds and market saturation in key segments. Consensus leans slightly bullish but with significant uncertainty around macro conditions.",
+    "agent_name": "bull_bear_debate",
+    "agent_type": "ensemble",
+    "timestamp": "2024-01-15T12:15:00Z",
+    "metadata": {}
+  },
+  {
+    "direction": "buy",
+    "confidence": 0.74,
+    "reasoning": "PPO agent trained on 3 years of historical data identifies favorable entry point. Reward signal maximized at current price level with 15-day holding period. Risk-adjusted return forecast: 3.2% over next 20 trading days.",
+    "agent_name": "finrl_ppo",
+    "agent_type": "rl",
+    "timestamp": "2024-01-15T12:20:00Z",
+    "metadata": {}
+  }
+]

@@ -1,0 +1,18 @@
+syntax = "proto3";
+package finrl;
+
+service FinRLService {
+  rpc Predict(PredictRequest) returns (PredictResponse);
+}
+
+message PredictRequest {
+  string symbol = 1;
+  repeated float observation = 2;
+  string model_name = 3;
+}
+
+message PredictResponse {
+  float action = 1;
+  float confidence = 2;
+  string model_name = 3;
+}

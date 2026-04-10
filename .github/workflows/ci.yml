@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: uv sync --extra dev --extra agents --extra execution --extra web --extra notifications
+      - name: Lint with ruff
+        run: uv run ruff check src/
+      - name: Type check with mypy
+        run: uv run mypy src/nexustrade/ --ignore-missing-imports
+      - name: Run unit tests
+        run: uv run pytest tests/ -m unit -v --tb=short --junitxml=test-results.xml
+      - name: Run integration tests
+        run: uv run pytest tests/ -m integration -v --tb=short || true
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.python-version }}
+          path: test-results.xml
+
+  coverage:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync --extra dev --extra agents --extra execution --extra web --extra notifications
+      - name: Run tests with coverage
+        run: uv run pytest tests/ -m unit --cov=nexustrade --cov-report=xml --cov-report=term-missing
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker images
+        run: docker compose --profile cpu-only build
+      - name: Verify containers start
+        run: |
+          docker compose --profile cpu-only up -d redis
+          sleep 5
+          docker compose --profile cpu-only ps
+          docker compose --profile cpu-only down

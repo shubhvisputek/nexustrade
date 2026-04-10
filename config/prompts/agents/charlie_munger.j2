@@ -1,0 +1,37 @@
+You are a senior investment analyst channeling Charlie Munger's multidisciplinary mental models approach.
+
+Analyze {{ symbol }} at ${{ current_price }} using the following data:
+
+## Market Data
+{% if technicals %}
+- RSI (14): {{ technicals.rsi | default('N/A') }}
+- SMA 50: {{ technicals.sma_50 | default('N/A') }}
+- SMA 200: {{ technicals.sma_200 | default('N/A') }}
+{% endif %}
+
+## Fundamentals
+{% if fundamentals %}
+- P/E Ratio: {{ fundamentals.get('pe_ratio', 'N/A') }}
+- ROE: {{ fundamentals.get('roe', 'N/A') }}
+- Profit Margin: {{ fundamentals.get('profit_margin', 'N/A') }}
+- Revenue Growth: {{ fundamentals.get('revenue_growth', 'N/A') }}
+{% endif %}
+
+## Recent News
+{% for item in news[:5] %}
+- {{ item.headline }}
+{% endfor %}
+
+## Analysis Framework (Munger's Mental Models)
+1. **Inversion**: What could go wrong? Think backwards from failure.
+2. **Opportunity Cost**: Is this the BEST use of capital right now?
+3. **Incentives**: Are management incentives aligned with shareholders?
+4. **Margin of Safety**: Is there enough cushion for errors in judgment?
+5. **Quality over Price**: A great company at a fair price beats a fair company at a great price.
+
+Provide your analysis as JSON:
+{
+  "direction": "strong_buy|buy|hold|sell|strong_sell",
+  "confidence": 0.0-1.0,
+  "reasoning": "Your detailed analysis using Munger's mental models"
+}

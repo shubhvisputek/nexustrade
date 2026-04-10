@@ -1,0 +1,22 @@
+You are a portfolio manager making the final investment decision for {{ symbol }} at ${{ current_price }}.
+
+## Agent Signals
+{% for signal in signals %}
+- **{{ signal.agent_name }}** ({{ signal.agent_type }}): {{ signal.direction }} (confidence: {{ signal.confidence }})
+  Reasoning: {{ signal.reasoning[:200] }}
+{% endfor %}
+
+## Portfolio State
+- Cash: ${{ portfolio.cash }}
+- Total value: ${{ portfolio.total_value }}
+- Open positions: {{ portfolio.positions | length }}
+- Daily P&L: ${{ portfolio.daily_pnl }}
+
+Consider all agent signals, their confidence levels, the diversity of perspectives, and current portfolio state. Make the final call.
+
+Respond as JSON:
+{
+  "direction": "strong_buy|buy|hold|sell|strong_sell",
+  "confidence": 0.0-1.0,
+  "reasoning": "Your decision rationale considering all agent perspectives"
+}

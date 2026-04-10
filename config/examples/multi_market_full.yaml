@@ -1,0 +1,167 @@
+# All markets, all features — full configuration
+log_level: INFO
+
+llm:
+  mode: hybrid
+  fast:
+    provider: ollama
+    model: "llama3:8b"
+    base_url: "http://localhost:11434"
+    temperature: 0.3
+    max_tokens: 2048
+  deep:
+    provider: anthropic
+    model: "claude-sonnet-4-20250514"
+    temperature: 0.7
+    max_tokens: 4096
+  vision:
+    provider: anthropic
+    model: "claude-sonnet-4-20250514"
+    temperature: 0.5
+    max_tokens: 4096
+  fallbacks:
+    - provider: openai
+      model: "gpt-4o"
+      temperature: 0.7
+      max_tokens: 4096
+
+agents:
+  enabled:
+    - name: warren_buffett
+      source: ai_hedge_fund
+      enabled: true
+    - name: charlie_munger
+      source: ai_hedge_fund
+      enabled: true
+    - name: technical_analyst
+      source: ai_hedge_fund
+      enabled: true
+    - name: bull_bear_debate
+      source: trading_agents_debate
+      enabled: true
+      config:
+        rounds: 3
+    - name: finbert_sentiment
+      source: finbert
+      enabled: true
+    - name: quantagent_vision
+      source: quantagent
+      enabled: true
+  aggregation_mode: portfolio_manager
+  min_confidence: 0.6
+  execution_mode: dag
+  debate_rounds: 3
+  early_termination_confidence: 0.95
+
+execution:
+  mode: both
+  brokers:
+    - name: paper
+      enabled: true
+      markets: ["us_equity", "india_equity", "crypto", "forex"]
+      config:
+        initial_cash: 500000.0
+        slippage_pct: 0.001
+    - name: alpaca
+      enabled: false
+      markets: ["us_equity"]
+      config:
+        paper: true
+    - name: openalgo
+      enabled: false
+      markets: ["india_equity", "india_fno"]
+      config:
+        host: "http://localhost:5000"
+    - name: ccxt_broker
+      enabled: false
+      markets: ["crypto"]
+      config:
+        exchange: binance
+        sandbox: true
+  tradingview:
+    enabled: true
+    webhook_port: 8888
+    india_route: openalgo
+    us_route: alpaca
+
+markets:
+  us_equity:
+    symbols: ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "META"]
+    data_provider: openbb
+  india_equity:
+    symbols: ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK"]
+    data_provider: broker_data
+    exchange: NSE
+  crypto:
+    symbols: ["BTC/USDT", "ETH/USDT", "SOL/USDT", "BNB/USDT"]
+    data_provider: ccxt
+    exchange: binance
+  forex:
+    symbols: ["EUR/USD", "GBP/USD", "USD/JPY"]
+    data_provider: openbb
+
+risk:
+  max_position_pct: 0.05
+  max_portfolio_risk: 0.20
+  sizing_model: cvar
+  cvar_confidence: 0.95
+  circuit_breaker:
+    max_daily_loss_pct: 0.03
+    max_consecutive_losses: 5
+    max_open_positions: 20
+    cooldown_minutes: 60
+
+scheduler:
+  analysis_interval: "1h"
+  timeframes: ["15m", "1h", "4h", "1d"]
+  risk_check_interval: "5m"
+
+data:
+  providers:
+    - name: openbb
+      enabled: true
+      priority: 1
+    - name: yahoo
+      enabled: true
+      priority: 10
+    - name: ccxt
+      enabled: true
+      priority: 1
+      config:
+        exchange: binance
+    - name: broker_data
+      enabled: true
+      priority: 1
+      config:
+        host: "http://localhost:5000"
+    - name: tradingview_mcp
+      enabled: true
+      priority: 2
+  routing:
+    us_equity: ["openbb", "yahoo"]
+    india_equity: ["broker_data", "openbb"]
+    crypto: ["ccxt", "openbb"]
+    forex: ["openbb", "tradingview_mcp"]
+  cache:
+    enabled: true
+    warm_on_start: true
+
+memory:
+  enabled: true
+  retention_days: 180
+  max_entries: 50000
+  similarity_threshold: 0.7
+
+notifications:
+  channels:
+    - name: telegram
+      config:
+        bot_token: ""  # Set via env
+        chat_id: ""
+    - name: discord
+      config:
+        webhook_url: ""
+  events:
+    trade: ["telegram", "discord"]
+    circuit_breaker: ["telegram", "discord"]
+    error: ["telegram"]

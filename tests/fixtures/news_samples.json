@@ -1,0 +1,92 @@
+[
+  {
+    "timestamp": "2024-01-15T10:00:00Z",
+    "headline": "Apple reports record Q4 earnings beating analyst estimates",
+    "source": "reuters",
+    "symbols": ["AAPL"],
+    "body": null,
+    "sentiment_score": 0.85,
+    "url": null
+  },
+  {
+    "timestamp": "2024-01-15T11:30:00Z",
+    "headline": "Reliance Industries expands Jio Platforms with new AI initiative",
+    "source": "economic_times",
+    "symbols": ["RELIANCE"],
+    "body": null,
+    "sentiment_score": 0.72,
+    "url": null
+  },
+  {
+    "timestamp": "2024-01-15T13:00:00Z",
+    "headline": "Bitcoin ETF approval sparks institutional buying frenzy",
+    "source": "coindesk",
+    "symbols": ["BTC/USDT"],
+    "body": null,
+    "sentiment_score": 0.91,
+    "url": null
+  },
+  {
+    "timestamp": "2024-01-16T08:45:00Z",
+    "headline": "Apple faces antitrust scrutiny in EU over App Store policies",
+    "source": "bloomberg",
+    "symbols": ["AAPL"],
+    "body": null,
+    "sentiment_score": -0.65,
+    "url": null
+  },
+  {
+    "timestamp": "2024-01-16T10:15:00Z",
+    "headline": "Reliance Retail posts slower growth amid rising competition",
+    "source": "livemint",
+    "symbols": ["RELIANCE"],
+    "body": null,
+    "sentiment_score": -0.42,
+    "url": null
+  },
+  {
+    "timestamp": "2024-01-16T14:30:00Z",
+    "headline": "Crypto market sees mixed signals as traders await Fed decision",
+    "source": "coindesk",
+    "symbols": ["BTC/USDT"],
+    "body": null,
+    "sentiment_score": -0.10,
+    "url": null
+  },
+  {
+    "timestamp": "2024-01-17T09:00:00Z",
+    "headline": "Apple Vision Pro pre-orders exceed expectations ahead of launch",
+    "source": "cnbc",
+    "symbols": ["AAPL"],
+    "body": null,
+    "sentiment_score": 0.78,
+    "url": null
+  },
+  {
+    "timestamp": "2024-01-17T12:00:00Z",
+    "headline": "Fed holds rates steady signaling cautious approach to cuts",
+    "source": "reuters",
+    "symbols": ["AAPL", "BTC/USDT"],
+    "body": null,
+    "sentiment_score": 0.05,
+    "url": null
+  },
+  {
+    "timestamp": "2024-01-18T07:30:00Z",
+    "headline": "Reliance Industries announces major green energy investment plan",
+    "source": "economic_times",
+    "symbols": ["RELIANCE"],
+    "body": null,
+    "sentiment_score": 0.68,
+    "url": null
+  },
+  {
+    "timestamp": "2024-01-18T16:00:00Z",
+    "headline": "Bitcoin drops below key support level as whale wallets liquidate",
+    "source": "coindesk",
+    "symbols": ["BTC/USDT"],
+    "body": null,
+    "sentiment_score": -0.75,
+    "url": null
+  }
+]
