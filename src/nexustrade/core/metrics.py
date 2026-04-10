@@ -70,6 +70,16 @@ class MetricsCollector:
     @classmethod
     def reset(cls) -> None:
         """Reset the singleton (useful for tests)."""
+        if cls._instance is not None and _HAS_PROMETHEUS:
+            from prometheus_client import REGISTRY
+
+            for attr in vars(cls._instance).values():
+                name = getattr(attr, "_name", None)
+                if isinstance(name, str) and name.startswith("nexustrade"):
+                    try:
+                        REGISTRY.unregister(attr)
+                    except Exception:
+                        pass
         cls._instance = None
 
     def __init__(self) -> None:
