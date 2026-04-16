@@ -1,224 +1,194 @@
-"""Unit tests for the NexusTrade Streamlit dashboard module.
+"""Unit tests for the rewritten Streamlit dashboard module.
 
-These tests verify that:
-- The dashboard module can be imported without errors.
+Verifies that:
+- The module imports cleanly under a Streamlit-free harness.
 - Helper / formatting functions behave correctly.
-- API client functions handle connection errors gracefully.
+- API client helpers surface errors instead of returning None.
 """
 
 from __future__ import annotations
 
-from unittest.mock import patch
+import sys
+import types
+from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
 
+
+def _stub_streamlit() -> None:
+    """Install a no-op Streamlit shim so the dashboard module can import.
+
+    The real Streamlit needs a running script-runner; for unit tests we
+    only need the module-level constants to load.
+    """
+    if "streamlit" in sys.modules and not isinstance(
+        sys.modules["streamlit"], types.ModuleType
+    ):
+        return
+    st = types.ModuleType("streamlit")
+
+    class _Sidebar:
+        def __getattr__(self, _name: str):
+            return MagicMock()
+
+    st.sidebar = _Sidebar()  # type: ignore[attr-defined]
+
+    def _passthrough(*args, **kwargs):  # type: ignore[no-untyped-def]
+        return MagicMock()
+
+    for name in (
+        "set_page_config", "title", "caption", "subheader", "divider",
+        "metric", "info", "warning", "error", "success", "toast", "json",
+        "markdown", "dataframe", "line_chart", "area_chart", "bar_chart",
+        "container", "expander", "radio", "selectbox", "text_input",
+        "number_input", "slider", "checkbox", "form", "form_submit_button",
+        "button", "spinner", "file_uploader", "download_button",
+        "data_editor", "session_state", "rerun", "text_area", "tabs",
+        "columns", "stop",
+    ):
+        setattr(st, name, _passthrough)
+    sys.modules["streamlit"] = st
+
+
+_stub_streamlit()
+
+
 # ---------------------------------------------------------------------------
-# Import tests
+# Import-time tests
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
 class TestDashboardImport:
-    """Verify the module is importable and exposes expected symbols."""
-
-    def test_module_imports(self) -> None:
-        from nexustrade.web import dashboard  # noqa: F401
-
-    def test_dashboard_title_constant(self) -> None:
-        from nexustrade.web.dashboard import DASHBOARD_TITLE
-
-        assert DASHBOARD_TITLE == "NexusTrade Trading Dashboard"
-
-    def test_dashboard_version_constant(self) -> None:
-        from nexustrade.web.dashboard import DASHBOARD_VERSION
-
-        assert DASHBOARD_VERSION == "0.1.0"
+    def test_module_imports_without_running_main(self) -> None:
+        # The module calls main() at import time, but every function call
+        # is a MagicMock no-op via the streamlit stub above.
+        with patch("httpx.Client") as mock_client_cls:
+            mock_client = mock_client_cls.return_value.__enter__.return_value
+            mock_client.get.side_effect = httpx.ConnectError("offline")
+            mock_client.post.side_effect = httpx.ConnectError("offline")
+            from nexustrade.web import dashboard  # noqa: F401
 
     def test_pages_dict_exists(self) -> None:
         from nexustrade.web.dashboard import PAGES
 
         assert isinstance(PAGES, dict)
-        assert "Dashboard Overview" in PAGES
-        assert "Portfolio & Trading" in PAGES
-        assert "Agents & Signals" in PAGES
-        assert "Configuration" in PAGES
-        assert "System Health" in PAGES
+        assert any("Live Monitor" in k for k in PAGES)
+        assert any("Portfolio" in k for k in PAGES)
+        assert any("Agents" in k for k in PAGES)
+        assert any("Backtest" in k for k in PAGES)
+        assert any("Risk" in k for k in PAGES)
+        assert any("Configuration" in k for k in PAGES)
+        assert any("Audit" in k for k in PAGES)
 
 
 # ---------------------------------------------------------------------------
-# Formatting helper tests
+# Formatting helpers
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
-class TestFormatCurrency:
+class TestFormatMoney:
     def test_positive_value(self) -> None:
-        from nexustrade.web.dashboard import format_currency
-
-        assert format_currency(1234.56) == "$1,234.56"
+        from nexustrade.web.dashboard import _fmt_money
+        assert _fmt_money(1234.56) == "$1,234.56"
 
     def test_zero(self) -> None:
-        from nexustrade.web.dashboard import format_currency
+        from nexustrade.web.dashboard import _fmt_money
+        assert _fmt_money(0) == "$0.00"
 
-        assert format_currency(0) == "$0.00"
-
-    def test_none_returns_zero(self) -> None:
-        from nexustrade.web.dashboard import format_currency
-
-        assert format_currency(None) == "$0.00"
+    def test_none_returns_em_dash(self) -> None:
+        from nexustrade.web.dashboard import _fmt_money
+        assert _fmt_money(None) == "—"
 
     def test_large_value(self) -> None:
-        from nexustrade.web.dashboard import format_currency
-
-        assert format_currency(1_000_000) == "$1,000,000.00"
+        from nexustrade.web.dashboard import _fmt_money
+        assert _fmt_money(1_000_000) == "$1,000,000.00"
 
     def test_negative_value(self) -> None:
-        from nexustrade.web.dashboard import format_currency
-
-        result = format_currency(-500.5)
-        assert "-" in result
+        from nexustrade.web.dashboard import _fmt_money
+        result = _fmt_money(-500.5)
+        assert result.startswith("-$")
         assert "500.50" in result
 
 
 @pytest.mark.unit
-class TestFormatPnl:
-    def test_positive_pnl(self) -> None:
-        from nexustrade.web.dashboard import format_pnl
+class TestTsShort:
+    def test_iso_returns_hms(self) -> None:
+        from nexustrade.web.dashboard import _ts_short
+        assert _ts_short("2026-04-16T12:34:56+00:00") == "12:34:56"
 
-        assert format_pnl(123.45) == "+$123.45"
+    def test_none_returns_em_dash(self) -> None:
+        from nexustrade.web.dashboard import _ts_short
+        assert _ts_short(None) == "—"
 
-    def test_negative_pnl(self) -> None:
-        from nexustrade.web.dashboard import format_pnl
-
-        result = format_pnl(-42.10)
-        assert result == "-$42.10" or ("-" in result and "42.10" in result)
-
-    def test_zero_pnl(self) -> None:
-        from nexustrade.web.dashboard import format_pnl
-
-        assert format_pnl(0) == "+$0.00"
-
-    def test_none_pnl(self) -> None:
-        from nexustrade.web.dashboard import format_pnl
-
-        assert format_pnl(None) == "$0.00"
+    def test_unparseable_returns_input(self) -> None:
+        from nexustrade.web.dashboard import _ts_short
+        assert _ts_short("not-a-date") == "not-a-date"
 
 
 @pytest.mark.unit
-class TestDirectionColor:
-    def test_buy(self) -> None:
-        from nexustrade.web.dashboard import direction_color
-
-        assert direction_color("buy") == "\U0001f7e2"  # green circle
-
-    def test_sell(self) -> None:
-        from nexustrade.web.dashboard import direction_color
-
-        assert direction_color("sell") == "\U0001f534"  # red circle
-
-    def test_hold(self) -> None:
-        from nexustrade.web.dashboard import direction_color
-
-        assert direction_color("hold") == "\u26aa"  # white circle
-
-    def test_bullish_case_insensitive(self) -> None:
-        from nexustrade.web.dashboard import direction_color
-
-        assert direction_color("Bullish") == "\U0001f7e2"
-
-    def test_empty_string(self) -> None:
-        from nexustrade.web.dashboard import direction_color
-
-        assert direction_color("") == "\u26aa"
-
-
-@pytest.mark.unit
-class TestServiceStatusIndicator:
-    def test_ok(self) -> None:
-        from nexustrade.web.dashboard import service_status_indicator
-
-        assert service_status_indicator("ok") == "\u2705"
-
-    def test_degraded(self) -> None:
-        from nexustrade.web.dashboard import service_status_indicator
-
-        assert service_status_indicator("degraded") == "\u26a0\ufe0f"
-
-    def test_unavailable(self) -> None:
-        from nexustrade.web.dashboard import service_status_indicator
-
-        assert service_status_indicator("unavailable") == "\u274c"
+class TestDirectionEmoji:
+    def test_known_directions_have_emoji(self) -> None:
+        from nexustrade.web.dashboard import _DIRECTION_EMOJI
+        for d in ("strong_buy", "buy", "hold", "sell", "strong_sell"):
+            assert d in _DIRECTION_EMOJI
 
 
 # ---------------------------------------------------------------------------
-# API client error-handling tests
+# API client error handling
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.unit
 class TestApiClientErrorHandling:
-    """Verify that api_get / api_put / api_post return None on failures."""
-
-    def test_api_get_connection_refused(self) -> None:
-        from nexustrade.web.dashboard import api_get
-
-        # Point at a port that is almost certainly not listening
-        with patch("nexustrade.web.dashboard.API_URL", "http://127.0.0.1:19999"):
-            result = api_get("/health")
-        assert result is None
-
-    def test_api_put_connection_refused(self) -> None:
-        from nexustrade.web.dashboard import api_put
+    def test_api_get_connection_refused_returns_error_dict(self) -> None:
+        from nexustrade.web import dashboard
 
         with patch("nexustrade.web.dashboard.API_URL", "http://127.0.0.1:19999"):
-            result = api_put("/config", json_body={"config": {}})
-        assert result is None
+            with patch("httpx.Client") as mock_client_cls:
+                mock_client = mock_client_cls.return_value.__enter__.return_value
+                mock_client.get.side_effect = httpx.ConnectError("refused")
+                result = dashboard._api_get("/health")
+        assert isinstance(result, dict)
+        assert "_error" in result
 
-    def test_api_post_connection_refused(self) -> None:
-        from nexustrade.web.dashboard import api_post
-
-        with patch("nexustrade.web.dashboard.API_URL", "http://127.0.0.1:19999"):
-            result = api_post("/webhook/order", json_body={"symbol": "AAPL"})
-        assert result is None
-
-    def test_api_get_returns_none_on_http_error(self) -> None:
-        """Simulate a 500 response from the backend."""
-        from nexustrade.web.dashboard import api_get
-
-        mock_response = httpx.Response(
-            status_code=500,
-            request=httpx.Request("GET", "http://localhost:8085/health"),
-        )
-        with patch("httpx.Client") as mock_client_cls:
-            mock_client = mock_client_cls.return_value.__enter__.return_value
-            mock_client.get.return_value = mock_response
-            result = api_get("/health")
-        assert result is None
-
-    def test_api_put_returns_none_on_http_error(self) -> None:
-        from nexustrade.web.dashboard import api_put
+    def test_api_post_returns_error_dict_on_http_error(self) -> None:
+        from nexustrade.web import dashboard
 
         mock_response = httpx.Response(
             status_code=400,
+            content=b"bad request",
+            request=httpx.Request("POST", "http://localhost:8085/orders/manual"),
+        )
+        with patch("httpx.Client") as mock_client_cls:
+            mock_client = mock_client_cls.return_value.__enter__.return_value
+            mock_client.post.return_value = mock_response
+            result = dashboard._api_post("/orders/manual", {"symbol": "AAPL"})
+        assert isinstance(result, dict)
+        assert "_error" in result
+        assert result["_error"].startswith("400")
+
+    def test_api_put_returns_error_dict_on_http_error(self) -> None:
+        from nexustrade.web import dashboard
+
+        mock_response = httpx.Response(
+            status_code=400,
+            content=b"bad",
             request=httpx.Request("PUT", "http://localhost:8085/config"),
         )
         with patch("httpx.Client") as mock_client_cls:
             mock_client = mock_client_cls.return_value.__enter__.return_value
             mock_client.put.return_value = mock_response
-            result = api_put("/config", json_body={"config": {}})
-        assert result is None
+            result = dashboard._api_put("/config", {"config": {}})
+        assert isinstance(result, dict)
+        assert "_error" in result
 
 
 @pytest.mark.unit
 class TestApiUrlConfigurable:
-    """Verify the API URL can be configured via environment variable."""
-
     def test_default_api_url(self) -> None:
         from nexustrade.web.dashboard import API_URL
-
-        # When env var is not set, the module-level default should be localhost:8085
-        # (the actual value depends on whether the env var was set before import,
-        # but we at least verify it's a string).
         assert isinstance(API_URL, str)
         assert API_URL.startswith("http")

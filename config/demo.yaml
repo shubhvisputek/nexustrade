@@ -6,6 +6,7 @@
 #   • Yahoo Finance for free market data (no API key needed)
 #   • Paper-trading broker only — never sends real orders
 #   • LLM keys are bring-your-own (entered in the dashboard or via env vars)
+#   • Falls back to deterministic momentum baseline when no key is set
 # ----------------------------------------------------------------------------
 
 log_level: INFO
@@ -13,36 +14,43 @@ log_level: INFO
 llm:
   mode: cloud
   fast:
-    provider: anthropic
-    model: "claude-haiku-4-5"
+    provider: groq
+    model: "llama-3.1-8b-instant"
     temperature: 0.3
-    max_tokens: 2048
-    # API key is read from ANTHROPIC_API_KEY env var or set via the UI.
+    max_tokens: 1024
   deep:
     provider: anthropic
-    model: "claude-sonnet-4-5"
-    temperature: 0.7
-    max_tokens: 4096
+    model: "claude-haiku-4-5"
+    temperature: 0.6
+    max_tokens: 2048
   vision: null
   fallbacks:
     - provider: openai
-      model: "gpt-5"
-      temperature: 0.7
+      model: "gpt-4o-mini"
+      temperature: 0.6
+    - provider: openrouter
+      model: "meta-llama/llama-3.1-8b-instruct:free"
 
 agents:
   enabled:
     - name: warren_buffett
       source: ai_hedge_fund
       enabled: true
+    - name: charlie_munger
+      source: ai_hedge_fund
+      enabled: true
     - name: technical_analyst
       source: ai_hedge_fund
       enabled: true
-    - name: finbert_sentiment
-      source: finbert
-      enabled: true
-  aggregation_mode: weighted
-  min_confidence: 0.5
-  execution_mode: parallel  # Faster demo experience
+    - name: peter_lynch
+      source: ai_hedge_fund
+      enabled: false
+    - name: cathie_wood
+      source: ai_hedge_fund
+      enabled: false
+  aggregation_mode: weighted_confidence
+  min_confidence: 0.4
+  execution_mode: parallel
 
 execution:
   mode: python
@@ -52,7 +60,8 @@ execution:
       markets: ["us_equity"]
       config:
         initial_cash: 100000.0
-        # Paper broker — orders are simulated, never reach a real broker.
+        slippage_pct: 0.001
+        commission_pct: 0.0005
 
 markets:
   us_equity:
@@ -65,10 +74,12 @@ risk:
   circuit_breaker:
     max_daily_loss_pct: 0.03
     max_consecutive_losses: 5
+    max_open_positions: 10
+    cooldown_minutes: 30
 
 scheduler:
   analysis_interval: "1h"
-  timeframes: ["1d", "4h"]
+  timeframes: ["1d"]
 
 data:
   providers:
@@ -79,7 +90,16 @@ data:
     us_equity: ["yahoo"]
   cache:
     enabled: true
-    ttl_seconds: 300
+
+# Notifications: leave channels empty for the demo (no spam to maintainer);
+# users can patch via PUT /config or via env vars.
+notifications:
+  channels: []
+  events:
+    fill: ["telegram"]
+    circuit_breaker: ["telegram", "email"]
+    risk_blocked: []
+    error: []
 
 # Redis URL is read from REDIS_URL env var (set in HF Space secrets to your
 # Upstash connection string). When missing, the event bus falls back to
