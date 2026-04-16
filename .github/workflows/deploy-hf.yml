@@ -1,0 +1,62 @@
+name: Deploy to Hugging Face Spaces
+
+# Auto-sync the repository to a Hugging Face Space on every push to main.
+# The Space is configured to rebuild its Docker image on push.
+#
+# Required GitHub repository secrets:
+#   HF_TOKEN     - Hugging Face access token with WRITE scope
+#   HF_USERNAME  - Hugging Face username that owns the Space
+#   HF_SPACE     - Space name (e.g. "nexustrade-demo")
+#
+# Trigger manually via the Actions tab, or automatically on every push to main.
+# All inputs are repository secrets - no untrusted user input is used.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  sync-to-hf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Validate required secrets
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_USERNAME: ${{ secrets.HF_USERNAME }}
+          HF_SPACE: ${{ secrets.HF_SPACE }}
+        run: |
+          missing=()
+          [ -z "$HF_TOKEN" ]    && missing+=("HF_TOKEN")
+          [ -z "$HF_USERNAME" ] && missing+=("HF_USERNAME")
+          [ -z "$HF_SPACE" ]    && missing+=("HF_SPACE")
+          if [ ${#missing[@]} -ne 0 ]; then
+            echo "::error::Missing required secrets: ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_USERNAME: ${{ secrets.HF_USERNAME }}
+          HF_SPACE: ${{ secrets.HF_SPACE }}
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git remote add space \
+            "https://${HF_USERNAME}:${HF_TOKEN}@huggingface.co/spaces/${HF_USERNAME}/${HF_SPACE}"
+          git push --force space main
+
+      - name: Print Space URL
+        env:
+          HF_USERNAME: ${{ secrets.HF_USERNAME }}
+          HF_SPACE: ${{ secrets.HF_SPACE }}
+        run: |
+          echo "Deployed to https://huggingface.co/spaces/${HF_USERNAME}/${HF_SPACE}"
+          echo "Space will rebuild automatically. Monitor logs in the Space UI."
