@@ -32,7 +32,9 @@ USER user
 WORKDIR /home/user/app
 
 # ---- Install Python dependencies -----------------------------------------
-COPY --chown=user:user pyproject.toml ./
+# README.md and LICENSE are referenced from pyproject.toml metadata; hatchling
+# validates them at build time, so they must be present before pip install.
+COPY --chown=user:user pyproject.toml README.md LICENSE ./
 COPY --chown=user:user src ./src
 
 # Install with the extras needed for the demo:
