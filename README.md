@@ -8,7 +8,7 @@ dockerfile: Dockerfile.hf-space
 app_port: 7860
 pinned: true
 license: apache-2.0
-short_description: Unified open-source LLM trading platform — 18 agents, multi-market, paper trading demo
+short_description: Open-source LLM trading platform — 18 agents, paper demo
 tags:
   - trading
   - llm
