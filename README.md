@@ -4,7 +4,6 @@ emoji: 📈
 colorFrom: indigo
 colorTo: purple
 sdk: docker
-dockerfile: Dockerfile.hf-space
 app_port: 7860
 pinned: true
 license: apache-2.0
