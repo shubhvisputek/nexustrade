@@ -1,0 +1,86 @@
+# NexusTrade — Hugging Face Spaces Demo Config
+# ----------------------------------------------------------------------------
+# Cloud-only configuration optimized for the free HF Spaces tier.
+#   • No Ollama (model files are too large for the free container)
+#   • No FinRL/FinGPT/Qlib heavy ML containers
+#   • Yahoo Finance for free market data (no API key needed)
+#   • Paper-trading broker only — never sends real orders
+#   • LLM keys are bring-your-own (entered in the dashboard or via env vars)
+# ----------------------------------------------------------------------------
+
+log_level: INFO
+
+llm:
+  mode: cloud
+  fast:
+    provider: anthropic
+    model: "claude-haiku-4-5"
+    temperature: 0.3
+    max_tokens: 2048
+    # API key is read from ANTHROPIC_API_KEY env var or set via the UI.
+  deep:
+    provider: anthropic
+    model: "claude-sonnet-4-5"
+    temperature: 0.7
+    max_tokens: 4096
+  vision: null
+  fallbacks:
+    - provider: openai
+      model: "gpt-5"
+      temperature: 0.7
+
+agents:
+  enabled:
+    - name: warren_buffett
+      source: ai_hedge_fund
+      enabled: true
+    - name: technical_analyst
+      source: ai_hedge_fund
+      enabled: true
+    - name: finbert_sentiment
+      source: finbert
+      enabled: true
+  aggregation_mode: weighted
+  min_confidence: 0.5
+  execution_mode: parallel  # Faster demo experience
+
+execution:
+  mode: python
+  brokers:
+    - name: paper
+      enabled: true
+      markets: ["us_equity"]
+      config:
+        initial_cash: 100000.0
+        # Paper broker — orders are simulated, never reach a real broker.
+
+markets:
+  us_equity:
+    symbols: ["AAPL", "MSFT", "GOOGL", "TSLA", "NVDA"]
+    data_provider: yahoo
+
+risk:
+  max_position_pct: 0.05
+  sizing_model: fixed_fraction
+  circuit_breaker:
+    max_daily_loss_pct: 0.03
+    max_consecutive_losses: 5
+
+scheduler:
+  analysis_interval: "1h"
+  timeframes: ["1d", "4h"]
+
+data:
+  providers:
+    - name: yahoo
+      enabled: true
+      priority: 1
+  routing:
+    us_equity: ["yahoo"]
+  cache:
+    enabled: true
+    ttl_seconds: 300
+
+# Redis URL is read from REDIS_URL env var (set in HF Space secrets to your
+# Upstash connection string). When missing, the event bus falls back to
+# in-process queues — fine for a single-container demo.

@@ -1,3 +1,24 @@
+---
+title: NexusTrade
+emoji: 📈
+colorFrom: indigo
+colorTo: purple
+sdk: docker
+dockerfile: Dockerfile.hf-space
+app_port: 7860
+pinned: true
+license: apache-2.0
+short_description: Unified open-source LLM trading platform — 18 agents, multi-market, paper trading demo
+tags:
+  - trading
+  - llm
+  - agents
+  - finance
+  - quant
+  - streamlit
+  - fastapi
+---
+
 <p align="center">
   <h1 align="center">NexusTrade</h1>
   <p align="center">
@@ -18,6 +39,14 @@
     <img src="https://img.shields.io/badge/features-55%2F55-brightgreen.svg" alt="Features">
     <img src="https://img.shields.io/badge/agents-18%20personas-purple.svg" alt="Agents">
     <img src="https://img.shields.io/badge/markets-US%20%7C%20India%20%7C%20Crypto%20%7C%20Forex%20%7C%20Options%20%7C%20Commodities-orange.svg" alt="Markets">
+  </p>
+  <p align="center">
+    <a href="https://huggingface.co/spaces/shubhvisputek/nexustrade-demo">
+      <img src="https://img.shields.io/badge/%F0%9F%A4%97%20Try%20Live%20Demo-Hugging%20Face%20Spaces-yellow" alt="Live Demo on Hugging Face Spaces">
+    </a>
+    <a href="DEPLOY_HF.md">
+      <img src="https://img.shields.io/badge/Deploy-to%20HF%20Spaces-blue" alt="Deploy to HF Spaces">
+    </a>
   </p>
 </p>
 

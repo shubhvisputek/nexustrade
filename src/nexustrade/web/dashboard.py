@@ -288,9 +288,84 @@ def page_agents() -> None:
         st.info("No signals available.")
 
 
+def _byo_key_panel() -> None:
+    """Bring-Your-Own-Key panel for demo deployments.
+
+    Lets visitors paste their own LLM API key into the running container's
+    environment so the agents can produce real signals without the demo host
+    paying for inference. Only shown when ``NEXUSTRADE_DEMO_MODE`` is set.
+    """
+    if not os.environ.get("NEXUSTRADE_DEMO_MODE"):
+        return
+
+    st.subheader("Bring Your Own LLM Key")
+    st.caption(
+        "This is a public demo. To run the agents, paste your own LLM API "
+        "key below. Keys are kept only in this container's memory and never "
+        "logged. They are wiped when the Space restarts."
+    )
+
+    provider = st.selectbox(
+        "Provider",
+        ["anthropic", "openai", "groq", "openrouter"],
+        key="byo_provider",
+        help="Pick the provider matching your key.",
+    )
+
+    env_var = {
+        "anthropic": "ANTHROPIC_API_KEY",
+        "openai": "OPENAI_API_KEY",
+        "groq": "GROQ_API_KEY",
+        "openrouter": "OPENROUTER_API_KEY",
+    }[provider]
+
+    current = os.environ.get(env_var, "")
+    masked = f"{current[:6]}…{current[-4:]}" if len(current) > 12 else "(not set)"
+    st.text(f"Current {env_var}: {masked}")
+
+    api_key = st.text_input(
+        f"{provider.capitalize()} API key",
+        type="password",
+        placeholder="sk-...",
+        key="byo_api_key",
+    )
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Save key for this session", type="primary"):
+            if api_key.strip():
+                os.environ[env_var] = api_key.strip()
+                st.success(
+                    f"{env_var} saved. The next agent run will use it."
+                )
+            else:
+                st.warning("Paste a key first.")
+    with col2:
+        if st.button("Clear key"):
+            os.environ.pop(env_var, None)
+            st.info(f"{env_var} cleared from this session.")
+
+    with st.expander("Where do I get a free key?"):
+        st.markdown(
+            """
+            - **Groq** (free, fastest) → <https://console.groq.com/keys>
+            - **OpenRouter** (free models available) → <https://openrouter.ai/keys>
+            - **Anthropic** (paid, $5 free trial) → <https://console.anthropic.com>
+            - **OpenAI** (paid) → <https://platform.openai.com/api-keys>
+
+            Demo data, paper-trading only — no real orders are ever sent.
+            """
+        )
+
+    st.divider()
+
+
 def page_config() -> None:
     """Page 4: Configuration."""
     st.header("Configuration")
+
+    # -- BYO key panel (demo deployments only) ---------------------------------
+    _byo_key_panel()
 
     # -- Current config --------------------------------------------------------
     st.subheader("Current Configuration")
